@@ -54,7 +54,8 @@ function blankClass(key: string): string {
                 :key="blank.key"
                 class="flex items-center gap-3"
             >
-                <span class="w-20 shrink-0 text-sm text-slate-400">{{ blank.key }}</span>
+                <!-- `label` e numele mărimii din enunț („p", „tariful autobuzului"); fără el, cheia. -->
+                <span class="w-24 shrink-0 text-sm text-slate-400"><MathText :text="blank.label ?? blank.key" /></span>
 
                 <!-- Cu variante predefinite dăm butoane; altfel câmp liber. -->
                 <div v-if="blank.options?.length" class="flex flex-wrap gap-2">

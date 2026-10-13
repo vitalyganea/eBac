@@ -24,6 +24,19 @@ const value = computed({
  */
 const input = ref<HTMLInputElement | null>(null);
 
+// Răspunsurile din baremele ANCE au radicali, π și e („9√2π cm²", „1 − 2/e"),
+// iar tastatura numerică a telefonului nu le are.
+const KEYS = [
+    { char: '−', insert: '-', label: 'minus' },
+    { char: '/', insert: '/', label: 'fracție' },
+    { char: ',', insert: ',', label: 'virgulă' },
+    { char: '√', insert: '√', label: 'radical' },
+    { char: 'π', insert: 'π', label: 'pi' },
+    { char: 'e', insert: 'e', label: 'numărul e' },
+    { char: '(', insert: '(', label: 'paranteză deschisă' },
+    { char: ')', insert: ')', label: 'paranteză închisă' },
+];
+
 function insert(char: string) {
     const el = input.value;
     const current = value.value;
@@ -65,22 +78,22 @@ function insert(char: string) {
             </span>
         </div>
 
-        <div v-if="!disabled" class="flex items-center gap-2">
+        <div v-if="!disabled" class="flex flex-wrap items-center gap-2">
             <button
-                v-for="char in ['−', '/', ',']"
-                :key="char"
+                v-for="key in KEYS"
+                :key="key.char"
                 type="button"
-                class="grid size-10 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-lg
+                class="grid size-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-lg
                        transition hover:border-white/25 active:scale-95"
-                :aria-label="char === '−' ? 'minus' : char === '/' ? 'fracție' : 'virgulă'"
+                :aria-label="key.label"
                 @mousedown.prevent
-                @click="insert(char === '−' ? '-' : char)"
+                @click="insert(key.insert)"
             >
-                {{ char }}
+                {{ key.char }}
             </button>
             <!-- Elevii din Moldova scriu virgula ca separator zecimal; graderul o
-                 acceptă, la fel ca fracțiile (3/2). -->
-            <p class="text-xs text-slate-500">Poți scrie cu virgulă (3,14) sau ca fracție (3/2).</p>
+                 acceptă, la fel ca fracțiile (3/2) și forma exactă din barem (9√2π). -->
+            <p class="text-xs text-slate-500">Scrie ca în barem: 3/2, 2√3, 9√2π — sau cu virgulă (3,14).</p>
         </div>
     </div>
 </template>

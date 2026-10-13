@@ -156,8 +156,10 @@ itemii vin din structura examenului (`exam_blueprints`), nu din selecția
 adaptivă — o simulare măsoară, nu antrenează, deci nu se calibrează pe nivelul
 elevului (un elev slab ar primi un test ușor și o estimare umflată).
 
-- **Secțiunile** se mapează pe bancă prin `structure[].types` și
-  `structure[].mock_items`. Punctele secțiunii se împart egal între itemii ei,
+- **Secțiunile** se mapează pe bancă prin `structure[].types`,
+  `structure[].mock_items` și, opțional, `structure[].skills` (capitolele —
+  la matematică toate secțiunile au aceleași tipuri, deci fără capitol o
+  „Geometrie" s-ar umple cu algebră). Punctele secțiunii se împart egal între itemii ei,
   deci ponderea din examen se păstrează. Secțiunile fără `types` sau cu
   `auto_gradable: false` nu se simulează și se declară în rezultat
   („acoperă 30 din 100 de puncte") — nu se ghicesc (§13).

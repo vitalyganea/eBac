@@ -38,7 +38,7 @@ export interface StudentItem {
         steps?: Choice[];
         left?: Choice[];
         right?: Choice[];
-        blanks?: { key: string; options?: string[] }[];
+        blanks?: { key: string; label?: string; options?: string[] }[];
         problem?: string;
         solved_steps?: string[];
         unit?: string;

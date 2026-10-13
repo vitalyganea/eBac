@@ -4,6 +4,7 @@ namespace App\Domain\Grading\Graders;
 
 use App\Domain\Grading\Grader;
 use App\Domain\Grading\GradeResult;
+use App\Domain\Grading\NumberExpression;
 use App\Models\Item;
 
 /**
@@ -55,6 +56,7 @@ final class NumericGrader implements Grader
      *   „90°", „2%", „5 biți"            — idem
      *   „x = 3" la punctul critic        — enunțul arată chiar „x = ?"
      *   „8 192", „−5"                    — spațiu de mii, minus tipografic
+     *   „9√2π", „500√3/3"               — forma exactă, ca în baremul ANCE
      *
      * Nimic din toate astea nu schimbă VALOAREA: un răspuns greșit rămâne
      * greșit. Unitatea se acceptă doar dacă e cea a itemului (`payload.unit`):
@@ -81,11 +83,12 @@ final class NumericGrader implements Grader
         // Elevii din Moldova scriu virgula ca separator zecimal.
         $raw = str_replace(',', '.', trim($raw));
 
-        if (preg_match('/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/', $raw, $m)) {
-            return (float) $m[2] == 0.0 ? null : (float) $m[1] / (float) $m[2];
+        if (is_numeric($raw)) {
+            return (float) $raw;
         }
 
-        return is_numeric($raw) ? (float) $raw : null;
+        // „3/2", „9√2π", „500√3/3" — forma exactă din barem.
+        return NumberExpression::evaluate($raw);
     }
 
     /** Unitatea itemului, cu felurile în care o tastează elevii pe telefon. */

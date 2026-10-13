@@ -73,12 +73,20 @@ it('pornește o simulare completă la fiecare disciplină cu conținut', functio
     expect($items->every(fn (Item $i) => $i->is_exam_holdout))->toBeTrue()
         ->and($items->pluck('id')->unique())->toHaveCount($items->count());
 
-    // Fiecare item stă în secțiunea al cărei tip îl acceptă.
+    // Fiecare item stă în secțiunea al cărei tip — și, unde e declarat,
+    // capitol — îl acceptă. La matematică toate secțiunile au aceleași tipuri,
+    // deci doar capitolul împiedică o „Geometrie" plină de algebră.
     foreach ($session->config['sections'] as $i => $section) {
         $types = $plan->autoSections[$i]['types'];
+        $skills = $plan->autoSections[$i]['skills'];
         foreach ($section['positions'] as $position) {
-            $item = $session->sessionItems->firstWhere('position', $position)->item;
+            $item = $session->sessionItems->firstWhere('position', $position)->item->load('skills.parent');
             expect($types)->toContain($item->type->value);
+
+            if ($skills !== []) {
+                $slugs = $item->skills->flatMap(fn ($s) => [$s->slug, $s->parent?->slug])->filter()->all();
+                expect(array_intersect($slugs, $skills))->not->toBeEmpty("{$item->source_ref} nu e din „{$section['name']}”");
+            }
         }
     }
 })->with(['matematica', 'informatica', 'limba-engleza', 'istoria']);
@@ -101,11 +109,13 @@ it('profilul alege structura, dar nu blochează accesul (§2a)', function () {
     $math = ($this->subject)('matematica');
 
     $umanist = User::factory()->create(['profile' => ExamProfile::Umanist]);
+    $arte = User::factory()->create(['profile' => ExamProfile::Arte]);
 
     expect(app(BlueprintResolver::class)->for($umanist, $istoria->id)->profile)->toBe(ExamProfile::Umanist)
         ->and(app(BlueprintResolver::class)->for($this->user, $istoria->id)->profile)->toBe(ExamProfile::Real)
-        // Nu există structură de matematică pentru umanist: primește cea disponibilă.
-        ->and(app(BlueprintResolver::class)->for($umanist, $math->id))->not->toBeNull();
+        ->and(app(BlueprintResolver::class)->for($umanist, $math->id)->profile)->toBe(ExamProfile::Umanist)
+        // Nu există structură de matematică pentru arte: primește cea disponibilă.
+        ->and(app(BlueprintResolver::class)->for($arte, $math->id))->not->toBeNull();
 });
 
 it('nu arată corectarea pe parcurs și nu trimite cheia înainte de final', function () {
@@ -290,3 +300,18 @@ it('pornește oricâte simulări la rând, la fiecare disciplină', function (st
 
     expect(PracticeSession::where('user_id', $this->user->id)->where('mode', SessionMode::Mock)->count())->toBe(8);
 })->with(['matematica', 'informatica', 'limba-engleza', 'istoria']);
+
+it('simulează matematica și la profilul umanist, cu structura lui', function () {
+    // Testul ANCE de la umanist are alte capitole decât cel de la real
+    // („Funcții" în loc de „Analiză matematică"), dar banca rezervată e comună.
+    $umanist = User::factory()->create(['profile' => ExamProfile::Umanist]);
+    $math = ($this->subject)('matematica');
+    $umanist->subjects()->attach($math->id, ['is_primary' => true, 'sort_order' => 0, 'added_at' => now()]);
+
+    foreach (range(1, 4) as $_) {
+        $session = app(StartMock::class)($umanist, $math->id);
+    }
+
+    expect(collect($session->config['sections'])->pluck('name'))->toContain('Funcții')
+        ->and($session->total_items)->toBe(14);
+});

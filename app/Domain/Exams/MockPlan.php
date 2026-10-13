@@ -13,6 +13,10 @@ use App\Models\ExamBlueprint;
  * `mock_items` — câți itemi din bancă o reprezintă. Punctajul secțiunii se
  * împarte egal între ei, deci ponderea secțiunilor rămâne cea din examen.
  *
+ * Fiecare secțiune poate restrânge și CAPITOLELE (`skills`): la matematică
+ * toate secțiunile primesc aceleași tipuri de item, deci fără capitole o
+ * „Geometrie" s-ar putea umple cu probleme de algebră.
+ *
  * Secțiunile care nu se pot corecta automat (eseul, răspunsul extins) NU se
  * simulează și NU se ghicesc: rezultatul spune cinstit „acoperă X din 100 de
  * puncte" (§13).
@@ -20,7 +24,7 @@ use App\Models\ExamBlueprint;
 final readonly class MockPlan
 {
     /**
-     * @param  list<array{name: string, points: int, types: list<string>, items: int, note: ?string}>  $autoSections
+     * @param  list<array{name: string, points: int, types: list<string>, skills: list<string>, items: int, note: ?string}>  $autoSections
      * @param  list<array{name: string, points: int, note: ?string}>  $manualSections
      */
     private function __construct(
@@ -50,6 +54,11 @@ final readonly class MockPlan
                     'name' => (string) $section['name'],
                     'points' => $points,
                     'types' => $types,
+                    // Opțional: capitolele din care vin itemii secțiunii (slug-uri
+                    // de competență, frunză sau părinte). La matematică toate
+                    // secțiunile au aceleași tipuri — „Algebră" și „Geometrie"
+                    // se deosebesc doar prin conținut.
+                    'skills' => array_values((array) ($section['skills'] ?? [])),
                     'items' => max(1, (int) ($section['mock_items'] ?? $section['items'] ?? 1)),
                     'note' => $section['note'] ?? null,
                 ];

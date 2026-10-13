@@ -59,7 +59,7 @@ final class MockItemPicker
         $sections = [];
 
         foreach ($plan->autoSections as $index => $section) {
-            $candidates = $this->candidates($user, $subjectId, $section['types'], $taken);
+            $candidates = $this->candidates($user, $subjectId, $section['types'], $section['skills'], $taken);
 
             [$fresh, $seen] = $candidates->partition(fn (Item $i) => ! $lastSeen->has($i->id));
 
@@ -69,8 +69,8 @@ final class MockItemPicker
             // ajunge tuturor. Regula se aplică și itemilor deja văzuți: prima
             // versiune o aplica doar celor nevăzuți, iar a doua simulare a
             // aceluiași elev nu mai pornea.
-            $laterTypes = collect(array_slice($plan->autoSections, $index + 1))->pluck('types')->flatten()->all();
-            $isShared = fn (Item $i) => in_array($i->type->value, $laterTypes, true);
+            $later = array_slice($plan->autoSections, $index + 1);
+            $isShared = fn (Item $i) => collect($later)->contains(fn (array $s) => $this->fits($i, $s));
 
             [$freshShared, $freshExclusive] = $fresh->partition($isShared);
             $oldestFirst = fn (Collection $items) => $items->sortBy(fn (Item $i) => $lastSeen->get($i->id))->values();
@@ -116,14 +116,34 @@ final class MockItemPicker
         }
     }
 
-    /** @param list<string> $types */
-    private function candidates(User $user, int $subjectId, array $types, array $exclude): Collection
+    /** Poate itemul să intre în secțiunea dată? Tip potrivit și, dacă e cazul, capitol potrivit. */
+    private function fits(Item $item, array $section): bool
+    {
+        if (! in_array($item->type->value, $section['types'], true)) {
+            return false;
+        }
+
+        return $section['skills'] === [] || $item->skills->contains(
+            fn ($skill) => in_array($skill->slug, $section['skills'], true)
+                || in_array($skill->parent?->slug, $section['skills'], true)
+        );
+    }
+
+    /**
+     * @param  list<string>  $types
+     * @param  list<string>  $skills  slug-uri de competență, frunză sau părinte
+     */
+    private function candidates(User $user, int $subjectId, array $types, array $skills, array $exclude): Collection
     {
         return Item::query()
             ->examPool()
             ->where('subject_id', $subjectId)
             ->where('language', $user->locale ?? 'ro')
             ->whereIn('type', $types)
+            // Grupat: un `or` liber ar scăpa de condiția de legătură item–competență.
+            ->when($skills !== [], fn ($q) => $q->whereHas('skills', fn ($s) => $s->where(fn ($w) => $w
+                ->whereIn('slug', $skills)
+                ->orWhereHas('parent', fn ($p) => $p->whereIn('slug', $skills)))))
             ->whereNotIn('items.id', $exclude)
             ->leftJoin('item_stats', 'item_stats.item_id', '=', 'items.id')
             // Un item semnalat automat ca posibil stricat ar strica nota.
@@ -133,7 +153,7 @@ final class MockItemPicker
             // bug de selecție s-a ascuns în teste tocmai pentru că baza
             // proaspătă le returna într-o ordine norocoasă.
             ->inRandomOrder()
-            ->with('skills')
+            ->with('skills.parent')
             ->get();
     }
 

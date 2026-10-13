@@ -37,24 +37,54 @@ class ExamBlueprintSeeder extends Seeder
         $istoria = Subject::where('slug', 'istoria')->first();
 
         if ($math) {
+            // Structura testelor ANCE din 2026, sesiunea de bază
+            // (12_mat_test_r_ro_sb26.pdf, 12_mat_test_u_ro_sb26.pdf). Fiecare
+            // problemă are un răspuns final în barem, deci se poate verifica; la
+            // examen se punctează însă și pașii, iar simularea nu-i vede.
+            $pasi = 'La examen se punctează și etapele rezolvării; simularea verifică doar răspunsul final.';
+            $tipuri = ['numeric', 'mcq', 'fill_blanks'];
+
             ExamBlueprint::updateOrCreate([
                 'subject_id' => $math->id,
                 'session' => '2026-baza',
                 'profile' => ExamProfile::Real->value,
             ], [
-                'total_items' => 10,
+                'total_items' => 14,
                 'total_points' => 100,
                 'duration_minutes' => 180,
                 'structure' => [
-                    ['name' => 'Itemi cu răspuns scurt', 'items' => 4, 'points' => 20, 'types' => ['numeric', 'mcq'],
-                        'mock_items' => 4],
-                    // La examen, rezolvări complete corectate pe barem. În bancă le
-                    // reprezintă itemii pe pași: pasul următor, ordinea pașilor și
-                    // „unde s-a pierdut punctul".
-                    ['name' => 'Rezolvare desfășurată', 'items' => 6, 'points' => 80,
-                        'types' => ['next_step', 'order_steps', 'find_error'], 'mock_items' => 6],
+                    ['name' => 'Algebră', 'items' => 5, 'points' => 34, 'types' => $tipuri,
+                        'skills' => ['algebra', 'trigonometrie'], 'mock_items' => 5, 'note' => $pasi],
+                    ['name' => 'Geometrie', 'items' => 3, 'points' => 21, 'types' => $tipuri,
+                        'skills' => ['geometrie'], 'mock_items' => 3, 'note' => $pasi],
+                    ['name' => 'Analiză matematică', 'items' => 4, 'points' => 29, 'types' => $tipuri,
+                        'skills' => ['analiza'], 'mock_items' => 4, 'note' => $pasi],
+                    ['name' => 'Combinatorică, binomul lui Newton, probabilități', 'items' => 2, 'points' => 16,
+                        'types' => $tipuri, 'skills' => ['combinatorica-probabilitati'], 'mock_items' => 2, 'note' => $pasi],
                 ],
-                'source_url' => 'https://ance.gov.md/clasa-sesiunea-examen/sesiunea-2026-0',
+                'source_url' => 'https://ance.gov.md/sites/default/files/12_mat_test_r_ro_sb26.pdf',
+                'is_active' => true,
+            ]);
+
+            ExamBlueprint::updateOrCreate([
+                'subject_id' => $math->id,
+                'session' => '2026-baza',
+                'profile' => ExamProfile::Umanist->value,
+            ], [
+                'total_items' => 14,
+                'total_points' => 100,
+                'duration_minutes' => 180,
+                'structure' => [
+                    ['name' => 'Algebră', 'items' => 5, 'points' => 37, 'types' => $tipuri,
+                        'skills' => ['algebra', 'trigonometrie'], 'mock_items' => 5, 'note' => $pasi],
+                    ['name' => 'Geometrie', 'items' => 4, 'points' => 26, 'types' => $tipuri,
+                        'skills' => ['geometrie'], 'mock_items' => 4, 'note' => $pasi],
+                    ['name' => 'Funcții', 'items' => 3, 'points' => 21, 'types' => $tipuri,
+                        'skills' => ['functii', 'progresii'], 'mock_items' => 3, 'note' => $pasi],
+                    ['name' => 'Combinatorică, statistică, calcul financiar, probabilități', 'items' => 2, 'points' => 16,
+                        'types' => $tipuri, 'skills' => ['combinatorica-probabilitati'], 'mock_items' => 2, 'note' => $pasi],
+                ],
+                'source_url' => 'https://ance.gov.md/sites/default/files/12_mat_test_u_ro_sb26.pdf',
                 'is_active' => true,
             ]);
         }

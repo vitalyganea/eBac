@@ -313,7 +313,7 @@ it('matricele și sistemele din LaTeX au trecerile la rând scrise corect', func
  * celelalte sunt auditate, se adaugă aici — lista crește, nu scade.
  */
 it('itemii disciplinelor auditate trimit la un document oficial ANCE', function () {
-    $auditate = ['limba-romana'];
+    $auditate = ['limba-romana', 'matematica'];
     $probleme = [];
 
     $itemi = Item::servable()

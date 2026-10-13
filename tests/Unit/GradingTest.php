@@ -131,6 +131,16 @@ describe('NumericGrader', function () {
         'procent la item fără unitate' => [[], ['value' => 0.5, 'tolerance' => 0.01], '50%', false],
         'π la item fără unitate' => [[], ['value' => 15], '15π', false],
         'text oarecare' => [[], ['value' => 15], 'cincisprezece', false],
+        // Forma exactă din baremul ANCE.
+        'radical și π' => [[], ['value' => 9 * sqrt(2) * M_PI, 'tolerance' => 0.01], '9√2π', true],
+        'radical scris sqrt' => [[], ['value' => 9 * sqrt(2) * M_PI, 'tolerance' => 0.01], '9sqrt2 pi', true],
+        'fracție cu radical' => [[], ['value' => 500 * sqrt(3) / 3, 'tolerance' => 0.01], '500√3/3', true],
+        'sumă în paranteză' => [[], ['value' => 16 + 4 * sqrt(3), 'tolerance' => 0.01], '(16 + 4√3)', true],
+        'aproximare zecimală' => [[], ['value' => 16 + 4 * sqrt(3), 'tolerance' => 0.01], '22,93', true],
+        'constanta e' => [[], ['value' => 1 - 2 / M_E, 'tolerance' => 0.005], '1 - 2/e', true],
+        'radical greșit' => [[], ['value' => 500 * sqrt(3) / 3, 'tolerance' => 0.01], '500√2/3', false],
+        'radical din negativ' => [[], ['value' => 2], '√-4', false],
+        'cod, nu număr' => [[], ['value' => 2], 'system(1)', false],
     ]);
 
     it('nu îndepărtează nimic la itemii fără bază declarată', function () {
@@ -171,6 +181,16 @@ describe('FillBlanksGrader', function () {
     it('ignoră diferența de majuscule implicit', function () {
         $i = item(ItemType::BalanceEquation, [], ['values' => ['b1' => 'NaCl']]);
         expect((new FillBlanksGrader)->grade($i, ['values' => ['b1' => 'nacl']])->isCorrect)->toBeTrue();
+    });
+
+    it('compară spațiile numerice ca valori', function () {
+        // BAC 2026, profil real, itemul 4: p = 2, q = −14.
+        $i = item(ItemType::FillBlanks, [], ['values' => ['p' => '2', 'q' => '-14'], 'numeric' => true]);
+        $g = new FillBlanksGrader;
+
+        expect($g->grade($i, ['values' => ['p' => '2', 'q' => '−14']])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['values' => ['p' => 'p = 2', 'q' => '-28/2']])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['values' => ['p' => '2', 'q' => '14']])->score)->toBe(0.5);
     });
 
     it('dă punctaj parțial pe spații', function () {
