@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ItemType;
 use App\Models\Item;
 use App\Models\Skill;
 use App\Models\Subject;
@@ -63,9 +64,16 @@ it('are metadate complete și canonical', function () {
 
 it('emite date structurate valide', function () {
     $subject = Subject::where('slug', 'matematica')->firstOrFail();
-    $skill = Skill::where('subject_id', $subject->id)
-        ->whereHas('items', fn ($q) => $q->practicePool()->where('type', 'mcq'))
-        ->firstOrFail();
+    // Pagina arată doar primii N itemi după dificultate, deci nu ajunge ca
+    // competența să aibă un MCQ oarecare — trebuie să fie printre cei afișați.
+    $skill = Skill::where('subject_id', $subject->id)->orderBy('id')->get()
+        ->first(fn (Skill $s) => $s->items()->practicePool()
+            ->orderBy('difficulty_seed')
+            ->limit(config('seo.public_items_per_skill'))
+            ->get()
+            ->contains('type', ItemType::Mcq));
+
+    expect($skill)->not->toBeNull();
 
     $html = $this->get(route('public.skill', [$subject->slug, $skill->slug]))->getContent();
 
