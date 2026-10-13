@@ -207,6 +207,8 @@ class MathContentSeeder extends Seeder
     {
         return [
             ...Matematica\Ance2026::items(),
+            ...Matematica\Ance2025::items(),
+            ...Matematica\Ance2024::items(),
             ...Matematica\Simulare2026::items(),
         ];
     }

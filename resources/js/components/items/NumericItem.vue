@@ -33,6 +33,7 @@ const KEYS = [
     { char: '√', insert: '√', label: 'radical' },
     { char: 'π', insert: 'π', label: 'pi' },
     { char: 'e', insert: 'e', label: 'numărul e' },
+    { char: 'ln', insert: 'ln', label: 'logaritm natural' },
     { char: '(', insert: '(', label: 'paranteză deschisă' },
     { char: ')', insert: ')', label: 'paranteză închisă' },
 ];
@@ -83,7 +84,7 @@ function insert(char: string) {
                 v-for="key in KEYS"
                 :key="key.char"
                 type="button"
-                class="grid size-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-lg
+                class="grid h-10 min-w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] px-2 text-lg
                        transition hover:border-white/25 active:scale-95"
                 :aria-label="key.label"
                 @mousedown.prevent
@@ -93,7 +94,7 @@ function insert(char: string) {
             </button>
             <!-- Elevii din Moldova scriu virgula ca separator zecimal; graderul o
                  acceptă, la fel ca fracțiile (3/2) și forma exactă din barem (9√2π). -->
-            <p class="text-xs text-slate-500">Scrie ca în barem: 3/2, 2√3, 9√2π — sau cu virgulă (3,14).</p>
+            <p class="text-xs text-slate-500">Scrie ca în barem: 3/2, 2√3, 9√2π, 1−2/e, ln2 — sau cu virgulă (3,14).</p>
         </div>
     </div>
 </template>

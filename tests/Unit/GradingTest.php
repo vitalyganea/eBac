@@ -138,6 +138,8 @@ describe('NumericGrader', function () {
         'sumă în paranteză' => [[], ['value' => 16 + 4 * sqrt(3), 'tolerance' => 0.01], '(16 + 4√3)', true],
         'aproximare zecimală' => [[], ['value' => 16 + 4 * sqrt(3), 'tolerance' => 0.01], '22,93', true],
         'constanta e' => [[], ['value' => 1 - 2 / M_E, 'tolerance' => 0.005], '1 - 2/e', true],
+        'logaritm natural' => [[], ['value' => log(2) ** 2 - 2 * log(2) + 1, 'tolerance' => 0.005], 'ln2^2 - 2ln2 + 1', true],
+        'logaritm, altă formă' => [[], ['value' => log(2) ** 2 - 2 * log(2) + 1, 'tolerance' => 0.005], '(ln(2) - 1)^2', true],
         'radical greșit' => [[], ['value' => 500 * sqrt(3) / 3, 'tolerance' => 0.01], '500√2/3', false],
         'radical din negativ' => [[], ['value' => 2], '√-4', false],
         'cod, nu număr' => [[], ['value' => 2], 'system(1)', false],

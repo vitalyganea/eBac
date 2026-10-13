@@ -132,11 +132,11 @@ pentru că ar vedea cheile de corectare.
 | Curs: istorie | 2 lecții · 18% din pondere |
 | Felie verticală web: antrenament cap-coadă | ✅ |
 | API v1 + Sanctum (pentru mobil) | ✅ schelet |
-| Conținut: matematică profil real | 14 competențe, 16 muchii, 17 itemi |
+| Conținut: matematică (real și umanist) | 20 de competențe, 168 de itemi din testele și baremele ANCE 2024–2026, plus 28 de variante rezervate simulării |
 | Conținut: informatică | 16 competențe, 17 muchii, 19 itemi, cod C++/Pascal |
 | Conținut: limba engleză | 11 competențe, 11 muchii, 20 itemi, nivel B1 |
 | Conținut: istorie | 12 competențe, 12 muchii, 19 itemi, itemi pe surse |
-| Conținut: limba și literatura română | 8 competențe, 48 de itemi, toți din testele și baremele ANCE 2021–2026 |
+| Conținut: limba și literatura română | 8 competențe, 45 de itemi din testele și baremele ANCE 2021–2026, o lecție despre notare |
 | Poartă automată de calitate pe itemi | ✅ 8 verificări structurale |
 | Suprafață publică SEO (Blade, zero JS) | ✅ 48 URL-uri în sitemap |
 | Alegerea disciplinelor, decuplată de profil | ✅ toate 10 selectabile |

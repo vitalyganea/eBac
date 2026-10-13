@@ -9,7 +9,7 @@ namespace App\Domain\Grading;
  * Baremele ANCE dau răspunsul exact, cu radicali și π. Un elev care scrie
  * „9√2π" a răspuns exact ca baremul, deci nu-l putem obliga să tasteze 39,98.
  *
- * Gramatica e deliberat mică — numere, + − · /, ^, paranteze, √, π, e și
+ * Gramatica e deliberat mică — numere, + − · /, ^, paranteze, √, ln, π, e și
  * înmulțirea implicită („2√3", „9π"). Nu există variabile, funcții sau `eval`:
  * intrarea vine din browser.
  */
@@ -61,19 +61,19 @@ final class NumberExpression
     private function tokenize(string $s): ?array
     {
         $s = strtr($s, [
-            'sqrt' => '√', 'rad' => '√', 'pi' => 'π', 'Pi' => 'π', 'PI' => 'π',
+            'sqrt' => '√', 'rad' => '√', 'pi' => 'π', 'Pi' => 'π', 'PI' => 'π', 'ln' => 'ℓ',
             '·' => '*', '×' => '*', '⋅' => '*', ':' => '/', '÷' => '/',
             '−' => '-', '–' => '-', '[' => '(', ']' => ')',
         ]);
 
-        preg_match_all('/\d+(?:\.\d+)?|[+\-*\/^()√πe]|\s+|./u', $s, $m);
+        preg_match_all('/\d+(?:\.\d+)?|[+\-*\/^()√πeℓ]|\s+|./u', $s, $m);
 
         $tokens = [];
         foreach ($m[0] as $t) {
             if (trim($t) === '') {
                 continue;
             }
-            if (! preg_match('/^(\d+(?:\.\d+)?|[+\-*\/^()√πe])$/u', $t)) {
+            if (! preg_match('/^(\d+(?:\.\d+)?|[+\-*\/^()√πeℓ])$/u', $t)) {
                 return null;
             }
             $tokens[] = $t;
@@ -190,6 +190,16 @@ final class NumberExpression
             return M_E;
         }
 
+        if ($t === 'ℓ') {
+            // ln se leagă, ca √, de atomul următor: „ln2^2" = (ln 2)², ca „ln²2".
+            $argument = $this->atom();
+            if ($argument <= 0) {
+                throw new \UnexpectedValueException;
+            }
+
+            return log($argument);
+        }
+
         if ($t === '√') {
             // √ se leagă de atomul imediat următor: „√2π" = √2 · π, „√(x+1)".
             $radicand = $this->atom();
@@ -209,6 +219,6 @@ final class NumberExpression
 
     private function startsAtom(string $t): bool
     {
-        return in_array($t, ['(', 'π', '√', 'e'], true) || is_numeric($t);
+        return in_array($t, ['(', 'π', '√', 'e', 'ℓ'], true) || is_numeric($t);
     }
 }
