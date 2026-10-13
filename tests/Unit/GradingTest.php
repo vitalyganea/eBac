@@ -195,6 +195,13 @@ describe('FillBlanksGrader', function () {
             ->and($g->grade($i, ['values' => ['p' => '2', 'q' => '14']])->score)->toBe(0.5);
     });
 
+    it('lasă textul ca text într-un item numeric', function () {
+        // Informatică, BAC 2026: „Scrieți denumirea instrucțiunii…" lângă „t[9] = ?".
+        $i = item(ItemType::FillBlanks, [], ['values' => ['instr' => ['while'], 't9' => ['9']], 'numeric' => true]);
+
+        expect((new FillBlanksGrader)->grade($i, ['values' => ['instr' => 'While', 't9' => '9.0']])->isCorrect)->toBeTrue();
+    });
+
     it('dă punctaj parțial pe spații', function () {
         $i = item(ItemType::BalanceEquation, [], ['values' => ['a' => '2', 'b' => '1', 'c' => '2']]);
         $r = (new FillBlanksGrader)->grade($i, ['values' => ['a' => '2', 'b' => '1', 'c' => '9']]);

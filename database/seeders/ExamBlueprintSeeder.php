@@ -90,9 +90,15 @@ class ExamBlueprintSeeder extends Seeder
         }
 
         if ($informatica) {
-            // Structura reală din programa ANCE 2021: 4 subiecte, 100 de puncte,
-            // 180 de minute. Subiectele II și III se rezolvă în Pascal SAU C/C++,
-            // la alegerea candidatului.
+            // Structura testelor ANCE din 2026 (12_inf_test_r_ro_sb26.pdf):
+            // 4 subiecte, 100 de puncte, 180 de minute. Pascal SAU C/C++ (§12).
+            // Subiectele II și III amestecă sarcini cu răspuns unic (ce
+            // afișează programul, valori, analiza unui program) cu programe
+            // scrise de la zero, corectate pe barem; punctele sunt cele din
+            // baremul din 2026, împărțite între cele două feluri.
+            $tipuri = ['numeric', 'mcq', 'fill_blanks', 'order_steps', 'match'];
+            $barem = 'Se corectează pe barem: programul se scrie de la zero și se punctează pe elemente.';
+
             ExamBlueprint::updateOrCreate([
                 'subject_id' => $informatica->id,
                 'session' => '2026-baza',
@@ -102,20 +108,18 @@ class ExamBlueprintSeeder extends Seeder
                 'total_points' => 100,
                 'duration_minutes' => 180,
                 'structure' => [
-                    ['name' => 'Subiectul I', 'items' => 1, 'points' => 25,
-                        'types' => ['mcq', 'numeric', 'fill_blanks'], 'mock_items' => 3,
-                        'note' => 'Itemi scurți: tipuri de date, informația, sisteme de numerație, algebră booleană.'],
-                    ['name' => 'Subiectul II', 'items' => 1, 'points' => 32,
-                        'types' => ['code_output', 'find_error'], 'mock_items' => 2,
-                        'note' => 'Analiză și elaborare de program. Pascal sau C/C++, la alegerea candidatului.'],
-                    ['name' => 'Subiectul III', 'items' => 1, 'points' => 30,
-                        'types' => ['order_steps', 'code_output'], 'mock_items' => 2,
-                        'note' => 'Problemă de programare cu date structurate sau subprograme.'],
-                    ['name' => 'Subiectul IV', 'items' => 1, 'points' => 13,
-                        'types' => ['match', 'mcq'], 'mock_items' => 2,
-                        'note' => 'Circuite logice / baze de date.'],
+                    ['name' => 'Subiectul I: informația, sisteme de numerație, circuite logice', 'items' => 3, 'points' => 25,
+                        'types' => $tipuri, 'skills' => ['informatia', 'bazele-aritmetice', 'logica-digitala'], 'mock_items' => 4],
+                    ['name' => 'Subiectul II: valori, expresii, ce afișează programul', 'items' => 2, 'points' => 11,
+                        'types' => $tipuri, 'skills' => ['tipuri-simple', 'instructiuni', 'tipuri-structurate'], 'mock_items' => 2],
+                    ['name' => 'Subiectul II: programe scrise', 'items' => 3, 'points' => 21, 'auto_gradable' => false, 'note' => $barem],
+                    ['name' => 'Subiectul III: analiza unui program cu subprograme', 'items' => 2, 'points' => 10,
+                        'types' => $tipuri, 'skills' => ['subprograme', 'recursie'], 'mock_items' => 2],
+                    ['name' => 'Subiectul III: programe scrise', 'items' => 2, 'points' => 20, 'auto_gradable' => false, 'note' => $barem],
+                    ['name' => 'Subiectul IV: baze de date (MS Access)', 'items' => 1, 'points' => 13, 'auto_gradable' => false,
+                        'note' => 'Interogarea se construiește în Design View și se corectează pe barem.'],
                 ],
-                'source_url' => 'https://ance.gov.md/sites/default/files/programa_bac_informatica_romana.pdf',
+                'source_url' => 'https://ance.gov.md/sites/default/files/12_inf_test_r_ro_sb26.pdf',
                 'is_active' => true,
             ]);
         }

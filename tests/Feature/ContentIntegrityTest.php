@@ -182,10 +182,12 @@ it('itemii de completare au un spațiu pentru fiecare valoare așteptată', func
 it('itemii de informatică cu cod oferă și C++ și Pascal', function () {
     $probleme = [];
 
+    // Orice item care arată un program, indiferent de tip: din testele ANCE
+    // vin și itemi numerici sau de completat care au cod.
     $itemi = Item::servable()
         ->whereHas('subject', fn ($q) => $q->where('slug', 'informatica'))
-        ->whereIn('type', [ItemType::CodeOutput, ItemType::FindError])
-        ->get();
+        ->get()
+        ->filter(fn (Item $i) => isset($i->payload['code']) || isset($i->payload['code_variants']));
 
     expect($itemi)->not->toBeEmpty();
 
@@ -313,7 +315,7 @@ it('matricele și sistemele din LaTeX au trecerile la rând scrise corect', func
  * celelalte sunt auditate, se adaugă aici — lista crește, nu scade.
  */
 it('itemii disciplinelor auditate trimit la un document oficial ANCE', function () {
-    $auditate = ['limba-romana', 'matematica'];
+    $auditate = ['limba-romana', 'matematica', 'informatica'];
     $probleme = [];
 
     $itemi = Item::servable()

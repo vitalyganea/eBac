@@ -38,7 +38,9 @@ final class FillBlanksGrader implements Grader
             // echivalente („a/2" și „0.5a").
             foreach ((array) $accepted as $variant) {
                 $variant = trim((string) $variant);
-                $matches = $numeric
+                // Cu `numeric`, un spațiu cu răspuns NUMERIC se compară ca
+                // valoare; unul cu răspuns text („while", „xx") rămâne text.
+                $matches = $numeric && NumberExpression::evaluate($variant) !== null
                     ? self::sameNumber($given, $variant)
                     : ($caseSensitive
                     ? $given === $variant

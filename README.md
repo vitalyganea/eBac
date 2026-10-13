@@ -133,7 +133,7 @@ pentru că ar vedea cheile de corectare.
 | Felie verticală web: antrenament cap-coadă | ✅ |
 | API v1 + Sanctum (pentru mobil) | ✅ schelet |
 | Conținut: matematică (real și umanist) | 20 de competențe, 168 de itemi din testele și baremele ANCE 2024–2026, plus 28 de variante rezervate simulării |
-| Conținut: informatică | 16 competențe, 17 muchii, 19 itemi, cod C++/Pascal |
+| Conținut: informatică | 16 competențe, 50 de sarcini din testele și baremele ANCE 2024–2026 (cod Pascal și C++), plus 16 variante rezervate simulării |
 | Conținut: limba engleză | 11 competențe, 11 muchii, 20 itemi, nivel B1 |
 | Conținut: istorie | 12 competențe, 12 muchii, 19 itemi, itemi pe surse |
 | Conținut: limba și literatura română | 8 competențe, 45 de itemi din testele și baremele ANCE 2021–2026, o lecție despre notare |

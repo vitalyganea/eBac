@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import CodeBlock from '@/components/CodeBlock.vue';
 import MathText from '@/components/MathText.vue';
 import type { ItemFeedback, StudentAnswer, StudentItem } from '@/types';
 
@@ -60,6 +61,13 @@ function insert(char: string) {
         </p>
 
         <MathText v-if="item.payload.stem_latex" :latex="item.payload.stem_latex" display />
+
+        <!-- Informatică: programul din test, în limbajul ales de elev (§12). -->
+        <CodeBlock
+            v-if="item.payload.code || item.payload.code_variants"
+            :code="item.payload.code"
+            :variants="item.payload.code_variants"
+        />
 
         <div class="flex items-center gap-3">
             <input
