@@ -211,6 +211,7 @@ class MathContentSeeder extends Seeder
             ...Matematica\Ance2024::items(),
             ...Matematica\Ance2023::items(),
             ...Matematica\Ance2022::items(),
+            ...Matematica\Ance2021::items(),
             ...Matematica\Simulare2026::items(),
         ];
     }

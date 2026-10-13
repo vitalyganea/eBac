@@ -132,7 +132,7 @@ pentru că ar vedea cheile de corectare.
 | Curs: istorie | 2 lecții · 18% din pondere |
 | Felie verticală web: antrenament cap-coadă | ✅ |
 | API v1 + Sanctum (pentru mobil) | ✅ schelet |
-| Conținut: matematică (real și umanist) | 20 de competențe, 168 de itemi din testele și baremele ANCE 2024–2026, plus 28 de variante rezervate simulării |
+| Conținut: matematică (real și umanist) | 20 de competențe, 313 itemi din testele și baremele ANCE 2021–2026, plus 28 de variante rezervate simulării |
 | Conținut: informatică | 16 competențe, 50 de sarcini din testele și baremele ANCE 2024–2026 (cod Pascal și C++), plus 16 variante rezervate simulării |
 | Conținut: limba engleză | 11 competențe, 11 muchii, 20 itemi, nivel B1 |
 | Conținut: istorie | 12 competențe, 24 de sarcini „Identifică în sursă” din testele ANCE 2024–2026, cu sursele reale din test; proba se corectează integral pe barem |
