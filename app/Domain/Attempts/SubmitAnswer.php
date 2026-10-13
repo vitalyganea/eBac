@@ -2,6 +2,8 @@
 
 namespace App\Domain\Attempts;
 
+use App\Domain\Exams\MockClosed;
+use App\Domain\Grading\AnswerKeyMask;
 use App\Domain\Grading\GradeResult;
 use App\Domain\Grading\GraderRegistry;
 use App\Domain\Leaderboards\Leaderboard;
@@ -51,6 +53,7 @@ final class SubmitAnswer
         private XpCalculator $xpCalculator,
         private Elo $elo,
         private Leaderboard $leaderboard,
+        private AnswerKeyMask $mask,
     ) {}
 
     public function __invoke(User $user, SubmitAnswerData $data): SubmitAnswerResult
@@ -84,6 +87,12 @@ final class SubmitAnswer
                 ->first()
             : null;
 
+        // Simularea are termen și o singură încercare pe întrebare. Termenul e
+        // al serverului (§5); timerul din browser se poate opri din DevTools.
+        if ($mode === SessionMode::Mock) {
+            $this->guardMock($session, $sessionItem);
+        }
+
         $serverMs = $sessionItem?->served_at
             ? (int) max(0, $sessionItem->served_at->diffInMilliseconds(now()))
             : null;
@@ -96,7 +105,10 @@ final class SubmitAnswer
             && $serverMs !== null;
 
         // --- Corectare (exclusiv pe server) --------------------------------
-        $grade = $this->graders->for($item->type)->grade($item, $data->answer);
+        // Clientul a văzut variantele sub jetoane opace; corectarea și faptul
+        // din `attempts` folosesc cheile originale din bancă.
+        $answer = $this->mask->unmaskAnswer($item, $data->answer);
+        $grade = $this->graders->for($item->type)->grade($item, $answer);
 
         // Numărul de indicii vine din `session_items`, ștampilat de RevealHint —
         // NU din request. Altfel elevul citește indiciile și raportează zero,
@@ -118,7 +130,7 @@ final class SubmitAnswer
             : null;
 
         $attempt = DB::transaction(function () use (
-            $user, $item, $session, $sessionItem, $data, $grade, $xp, $eloResult, $mode, $serverMs, $hintsUsed, $isRanked, $stats
+            $user, $item, $session, $sessionItem, $data, $answer, $grade, $xp, $eloResult, $mode, $serverMs, $hintsUsed, $isRanked, $stats
         ) {
             $attempt = Attempt::create([
                 'client_uuid' => $data->clientUuid,
@@ -130,7 +142,7 @@ final class SubmitAnswer
                 // disciplină nu trebuie să facă join pe un tabel de zeci de
                 // milioane de rânduri.
                 'subject_id' => $item->subject_id,
-                'answer' => $data->answer,
+                'answer' => $answer,
                 'is_correct' => $grade->isCorrect,
                 'score' => $grade->score,
                 'client_ms' => $data->clientMs,
@@ -189,6 +201,29 @@ final class SubmitAnswer
             explanation: $item->explanation,
             totals: $this->totals($user->refresh()),
         );
+    }
+
+    /**
+     * Câteva secunde de toleranță pentru latența rețelei: un răspuns trimis în
+     * ultima secundă nu trebuie pierdut pentru că a ajuns cu 300 ms mai târziu.
+     */
+    private const MOCK_GRACE_SECONDS = 30;
+
+    private function guardMock(PracticeSession $session, ?SessionItem $sessionItem): void
+    {
+        if ($session->isComplete()) {
+            throw new MockClosed('Lucrarea a fost deja predată.');
+        }
+
+        if ($session->expires_at?->copy()->addSeconds(self::MOCK_GRACE_SECONDS)->isPast()) {
+            throw new MockClosed('Timpul simulării a expirat.');
+        }
+
+        // Un item deja răspuns nu mai are rând deschis: la examen nu primești
+        // foaia înapoi ca să schimbi un răspuns după ce l-ai predat.
+        if ($sessionItem === null) {
+            throw new MockClosed('Întrebarea nu mai poate primi răspuns în această simulare.');
+        }
     }
 
     /**

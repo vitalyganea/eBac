@@ -9,6 +9,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Livewire\Exceptions\ComponentNotFoundException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -46,4 +47,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Livewire servește JS/CSS per componentă la `/livewire-*/js/{component}.js`.
+        // Un nume inexistent în URL arunca o excepție netratată: 500 și o
+        // intrare în log pentru orice URL inventat. E o resursă care nu există,
+        // deci 404.
+        $exceptions->render(fn (ComponentNotFoundException $e) => abort(404));
+        $exceptions->dontReport(ComponentNotFoundException::class);
     })->create();

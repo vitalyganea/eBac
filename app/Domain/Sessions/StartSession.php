@@ -4,9 +4,11 @@ namespace App\Domain\Sessions;
 
 use App\Enums\ClientSource;
 use App\Enums\SessionMode;
+use App\Models\Item;
 use App\Models\PracticeSession;
 use App\Models\SessionItem;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -32,18 +34,34 @@ final class StartSession
             throw new RuntimeException('Nu există itemi publicați disponibili pentru această selecție.');
         }
 
-        return DB::transaction(function () use ($user, $subjectId, $mode, $items, $ghostSessionId, $source) {
+        return $this->create($user, $subjectId, $mode, $items, [
+            'ghost_session_id' => $ghostSessionId,
+            'is_ranked' => $mode->isRanked() && $source === ClientSource::Web,
+            'source' => $source,
+            // Sesiunile abandonate nu blochează itemii pe termen nelimitat.
+            'expires_at' => now()->addHours(3),
+        ]);
+    }
+
+    /**
+     * Creează sesiunea cu itemii DEJA aleși, în ordinea dată.
+     *
+     * Folosit și de simulări (`StartMock`), unde itemii nu vin din selecția
+     * adaptivă, ci din structura examenului.
+     *
+     * @param  Collection<int, Item>  $items
+     * @param  array<string, mixed>  $attributes
+     */
+    public function create(User $user, int $subjectId, SessionMode $mode, Collection $items, array $attributes = []): PracticeSession
+    {
+        return DB::transaction(function () use ($user, $subjectId, $mode, $items, $attributes) {
             $session = PracticeSession::create([
                 'user_id' => $user->id,
                 'subject_id' => $subjectId,
                 'mode' => $mode,
                 'total_items' => $items->count(),
-                'ghost_session_id' => $ghostSessionId,
-                'is_ranked' => $mode->isRanked() && $source === ClientSource::Web,
-                'source' => $source,
                 'started_at' => now(),
-                // Sesiunile abandonate nu blochează itemii pe termen nelimitat.
-                'expires_at' => now()->addHours($mode === SessionMode::Mock ? 5 : 3),
+                ...$attributes,
             ]);
 
             // Itemii sunt REZERVAȚI acum, dar `served_at` se ștampilează abia când

@@ -83,6 +83,49 @@ describe('MatchingGrader', function () {
 });
 
 describe('NumericGrader', function () {
+    it('acceptă indicele bazei scris de elev la conversii', function (string $raspuns, bool $corect) {
+        // Enunțul și explicația scriu 13_{(10)}, deci elevul poate tasta și
+        // indicele. Valoarea e corectă — a fost doar scrisă complet.
+        $i = item(ItemType::Numeric, ['unit' => 'în baza 10'], ['value' => 13, 'tolerance' => 0, 'base' => 10]);
+
+        expect((new NumericGrader)->grade($i, ['value' => $raspuns])->isCorrect)->toBe($corect);
+    })->with([
+        ['13', true], ['13(10)', true], ['13 (10)', true], ['13_10', true],
+        ['13_{10}', true], ['13₁₀', true], ['13₍₁₀₎', true],
+        // Fără separator e alt număr, iar altă bază e alt răspuns.
+        ['1310', false], ['13(2)', false], ['1101', false],
+    ]);
+
+    it('acceptă formele firești ale unui răspuns corect', function (array $payload, array $key, string $raspuns, bool $corect) {
+        $i = item(ItemType::Numeric, $payload, $key);
+
+        expect((new NumericGrader)->grade($i, ['value' => $raspuns])->isCorrect)->toBe($corect);
+    })->with([
+        'fracție' => [[], ['value' => 1.5, 'tolerance' => 0.001], '3/2', true],
+        'fracție cu spații' => [[], ['value' => 0.75, 'tolerance' => 0.001], '3 / 4', true],
+        'fracție greșită' => [[], ['value' => 1.5, 'tolerance' => 0.001], '2/3', false],
+        'împărțire la zero' => [[], ['value' => 1.5], '3/0', false],
+        'multiplu de π' => [['unit' => 'π'], ['value' => 15], '15π', true],
+        'pi scris cu litere' => [['unit' => 'π'], ['value' => 15], '15 pi', true],
+        'grade' => [['unit' => '°'], ['value' => 90], '90°', true],
+        'grade în cuvinte' => [['unit' => '°'], ['value' => 90], '90 grade', true],
+        'procent' => [['unit' => '%'], ['value' => 2, 'tolerance' => 0.01], '2%', true],
+        'biți' => [['unit' => 'biți'], ['value' => 5], '5 biti', true],
+        'atribuire' => [[], ['value' => 3], 'x = 3', true],
+        'atribuire greșită' => [[], ['value' => 3], 'x = 4', false],
+        'spațiu de mii' => [[], ['value' => 8192], '8 192', true],
+        'minus tipografic' => [[], ['value' => -5], '−5', true],
+        // Unitatea se acceptă doar dacă e a itemului.
+        'procent la item fără unitate' => [[], ['value' => 0.5, 'tolerance' => 0.01], '50%', false],
+        'π la item fără unitate' => [[], ['value' => 15], '15π', false],
+        'text oarecare' => [[], ['value' => 15], 'cincisprezece', false],
+    ]);
+
+    it('nu îndepărtează nimic la itemii fără bază declarată', function () {
+        $i = item(ItemType::Numeric, [], ['value' => 13, 'tolerance' => 0]);
+        expect((new NumericGrader)->grade($i, ['value' => '13(10)'])->isCorrect)->toBeFalse();
+    });
+
     it('acceptă în limita toleranței', function () {
         $i = item(ItemType::Numeric, [], ['value' => 3.14159, 'tolerance' => 0.01]);
         expect((new NumericGrader)->grade($i, ['value' => 3.14])->isCorrect)->toBeTrue();

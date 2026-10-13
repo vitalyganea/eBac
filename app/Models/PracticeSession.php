@@ -45,6 +45,11 @@ class PracticeSession extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function blueprint(): BelongsTo
+    {
+        return $this->belongsTo(ExamBlueprint::class, 'blueprint_id');
+    }
+
     public function sessionItems(): HasMany
     {
         return $this->hasMany(SessionItem::class, 'session_id')->orderBy('position');

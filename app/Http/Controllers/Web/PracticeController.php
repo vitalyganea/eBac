@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Web;
 
 use App\Domain\Attempts\SubmitAnswer;
+use App\Domain\Exams\FinishMock;
+use App\Domain\Exams\MockClosed;
+use App\Domain\Exams\MockReport;
 use App\Domain\Sessions\RevealHint;
 use App\Domain\Sessions\ServeNextItem;
 use App\Domain\Sessions\StartSession;
@@ -34,7 +37,9 @@ class PracticeController extends Controller
     {
         $validated = $request->validate([
             'subject' => ['required', 'string', 'exists:subjects,slug'],
-            'mode' => ['nullable', 'string', 'in:practice,daily,mock,boss'],
+            // Simularea pornește din MockExamController: itemii ei vin din
+            // structura examenului, nu din selecția adaptivă.
+            'mode' => ['nullable', 'string', 'in:practice,daily,boss'],
             'skills' => ['nullable', 'array'],
             'skills.*' => ['integer', 'exists:skills,id'],
         ]);
@@ -57,7 +62,19 @@ class PracticeController extends Controller
     {
         abort_unless($session->user_id === $request->user()->id, 403);
 
+        $isMock = $session->mode === SessionMode::Mock;
+
+        // Simularea se încheie când e predată, când expiră termenul (pe server)
+        // sau când nu mai are întrebări. Rezultatul se arată abia atunci.
+        if ($isMock && ($session->isComplete() || $session->isExpired())) {
+            return $this->mockResult($request, $session);
+        }
+
         $sessionItem = $server->next($session);
+
+        if ($sessionItem === null && $isMock) {
+            return $this->mockResult($request, $session);
+        }
 
         if ($sessionItem === null) {
             return Inertia::render('Practice/Complete', [
@@ -88,6 +105,34 @@ class PracticeController extends Controller
             'submitted' => null,
             'lesson' => null,
             'has_next' => true,
+            'exam' => $isMock ? $this->examProps($session, $sessionItem->position) : null,
+        ]);
+    }
+
+    /**
+     * Ce vede elevul în timpul simulării: termenul (al serverului) și secțiunea.
+     * `server_now` permite clientului să-și corecteze ceasul: un telefon cu ora
+     * greșită ar număra altfel, chiar dacă termenul real rămâne cel de aici.
+     */
+    private function examProps(PracticeSession $session, int $position): array
+    {
+        $section = collect($session->config['sections'] ?? [])
+            ->first(fn (array $s) => in_array($position, $s['positions'], true));
+
+        return [
+            'deadline_at' => $session->expires_at?->toIso8601String(),
+            'server_now' => now()->toIso8601String(),
+            'section' => $section['name'] ?? null,
+        ];
+    }
+
+    private function mockResult(Request $request, PracticeSession $session): Response
+    {
+        app(FinishMock::class)($session);
+
+        return Inertia::render('Exam/Result', [
+            'subject' => $session->subject?->only(['slug', 'name']),
+            'result' => app(MockReport::class)->build($session->refresh(), $request),
         ]);
     }
 
@@ -169,8 +214,20 @@ class PracticeController extends Controller
         PracticeSession $session,
         SubmitAnswer $submit,
         ServeNextItem $server,
-    ): Response {
+    ): Response|RedirectResponse {
         abort_unless($session->user_id === $request->user()->id, 403);
+
+        // În simulare nu există feedback pe parcurs: răspunsul se înregistrează
+        // și elevul trece la întrebarea următoare. Corectarea o vede la final.
+        if ($session->mode === SessionMode::Mock) {
+            try {
+                $submit($request->user(), $request->toData());
+            } catch (MockClosed $e) {
+                return to_route('practice.play', $session->uuid)->with('error', $e->getMessage());
+            }
+
+            return to_route('practice.play', $session->uuid);
+        }
 
         $result = $submit($request->user(), $request->toData());
 
@@ -197,6 +254,7 @@ class PracticeController extends Controller
             'lesson' => $this->lessonSummary($item),
             'submitted' => $request->input('answer'),
             'has_next' => $session->answered_items < $session->total_items,
+            'exam' => null,
         ]);
     }
 }

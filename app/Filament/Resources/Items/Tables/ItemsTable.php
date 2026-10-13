@@ -15,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -137,10 +138,13 @@ class ItemsTable
 
                 TernaryFilter::make('needs_review')
                     ->label('Semnalat automat')
+                    // Filament injectează argumentele după NUME: parametrul
+                    // trebuie să se numească `$query`. Cu `$q` primea un Builder
+                    // gol, fără model, iar lista de itemi cădea cu 500.
                     ->queries(
-                        true: fn ($q) => $q->whereHas('stats', fn ($s) => $s->where('needs_review', true)),
-                        false: fn ($q) => $q->whereDoesntHave('stats', fn ($s) => $s->where('needs_review', true)),
-                        blank: fn ($q) => $q,
+                        true: fn (Builder $query) => $query->whereHas('stats', fn ($s) => $s->where('needs_review', true)),
+                        false: fn (Builder $query) => $query->whereDoesntHave('stats', fn ($s) => $s->where('needs_review', true)),
+                        blank: fn (Builder $query) => $query,
                     ),
 
                 TernaryFilter::make('is_exam_holdout')->label('Holdout'),
@@ -156,11 +160,14 @@ class ItemsTable
                     ->requiresConfirmation()
                     ->modalDescription('Itemul devine vizibil elevilor. Verifică enunțul și cheia de corectare.')
                     ->action(function (Item $record) {
-                        $record->update([
+                        // `reviewed_by`/`reviewed_at` NU sunt în #[Fillable]: cine a
+                        // validat itemul nu se poate seta dintr-un formular.
+                        // Aici o scrie serverul, explicit.
+                        $record->forceFill([
                             'status' => ItemStatus::Published,
                             'reviewed_by' => auth()->id(),
                             'reviewed_at' => now(),
-                        ]);
+                        ])->save();
 
                         Notification::make()->title('Item publicat')->success()->send();
                     }),
@@ -189,11 +196,11 @@ class ItemsTable
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
-                            $records->each->update([
+                            $records->each(fn (Item $item) => $item->forceFill([
                                 'status' => ItemStatus::Published,
                                 'reviewed_by' => auth()->id(),
                                 'reviewed_at' => now(),
-                            ]);
+                            ])->save());
 
                             Notification::make()
                                 ->title("{$records->count()} itemi publicați")

@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Domain\Exams\BlueprintResolver;
+use App\Domain\Exams\MockItemPicker;
 use App\Domain\Leaderboards\Leaderboard;
 use App\Domain\Xp\Level;
+use App\Enums\SessionMode;
 use App\Models\LearningGap;
 use App\Models\Lesson;
+use App\Models\PracticeSession;
 use App\Models\Subject;
 use App\Models\SubjectStat;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,12 +27,18 @@ use Inertia\Response;
  * Trei zone, în ordinea în care le folosește elevul:
  *   Curs       — teoria (în construcție)
  *   Teste      — antrenamentul, funcțional
+ *   Simulare   — structura examenului pe itemi de holdout, cu termen
  *   Clasament  — poziția la ACEASTĂ disciplină
  */
 class SubjectHubController extends Controller
 {
-    public function __invoke(Request $request, string $slug, Leaderboard $leaderboard): Response
-    {
+    public function __invoke(
+        Request $request,
+        string $slug,
+        Leaderboard $leaderboard,
+        BlueprintResolver $blueprints,
+        MockItemPicker $picker,
+    ): Response {
         $user = $request->user();
         $subject = Subject::where('slug', $slug)->firstOrFail();
 
@@ -80,9 +91,49 @@ class SubjectHubController extends Controller
                     'lessons_count' => $lessonCount,
                 ],
                 'tests' => ['available' => $itemCount > 0, 'items_count' => $itemCount],
+                'mock' => $this->mockSection($user, $subject->id, $blueprints, $picker),
             ],
 
             'board' => Inertia::defer(fn () => $leaderboard->subjectBoard($user, $subject->id)),
         ]);
+    }
+
+    /**
+     * Simularea: ce acoperă, dacă se poate porni și rezultatele anterioare.
+     *
+     * Ca și cursul, apare și când nu se poate porni — cu motivul real, nu
+     * ascunsă (§2a): elevul vede unde merge produsul.
+     */
+    private function mockSection(User $user, int $subjectId, BlueprintResolver $blueprints, MockItemPicker $picker): array
+    {
+        $plan = $blueprints->planFor($user, $subjectId);
+
+        if ($plan === null) {
+            return ['available' => false, 'reason' => 'Structura examenului e în pregătire.', 'plan' => null, 'history' => []];
+        }
+
+        $reason = $picker->check($user, $subjectId, $plan);
+
+        $history = PracticeSession::query()
+            ->where('user_id', $user->id)
+            ->where('subject_id', $subjectId)
+            ->where('mode', SessionMode::Mock)
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->limit(5)
+            ->get(['uuid', 'score', 'config', 'completed_at'])
+            ->map(fn (PracticeSession $s) => [
+                'uuid' => $s->uuid,
+                'score' => (float) $s->score,
+                'auto_points' => (int) ($s->config['auto_points'] ?? 0),
+                'completed_at' => $s->completed_at->toIso8601String(),
+            ]);
+
+        return [
+            'available' => $reason === null,
+            'reason' => $reason,
+            'plan' => $plan->summary(),
+            'history' => $history,
+        ];
     }
 }

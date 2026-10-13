@@ -50,6 +50,46 @@ use Illuminate\Support\Facades\DB;
 class EnglezaContentSeeder extends Seeder
 {
     /** Text-suport folosit de itemii de comprehensiune (tema: cultura digitală). */
+    /**
+     * Text pentru simulare (holdout), scris pentru platformă. Ca și celelalte,
+     * e original și neatribuit: nu prezentăm ficțiune ca știre reală despre o
+     * persoană existentă.
+     */
+    private const PASSAGE_REPAIR = <<<'TXT'
+        Three years ago, a retired electrician named Tom Wilkins noticed something that
+        annoyed him. Every Monday, his neighbours put perfectly good things out with the
+        rubbish: lamps with a broken switch, chairs with a loose leg, radios that only needed
+        a new wire. "Most of these things could be fixed in ten minutes," he says. "People
+        just didn't know how, or they thought it wasn't worth the trouble."
+
+        So Tom decided to do something about it. He asked the local library if he could use
+        one of its rooms on Saturday mornings, and he put up a few posters in shops. On the
+        first Saturday, only four people came. Two of them brought broken toasters, one
+        brought a bicycle with a flat tyre, and the fourth simply wanted to see what was
+        going on.
+
+        Today the Repair Café is one of the busiest places in town. Around twenty volunteers
+        – electricians, tailors, carpenters and a few computer specialists – work there every
+        week, and together they fix about sixty objects each Saturday. The repairs are free,
+        although visitors can leave a small donation for tools and spare parts.
+
+        But Tom insists that repairing things is only half of the idea. Visitors are not
+        allowed to leave their objects and come back later. Instead, they have to sit next to
+        the volunteer and watch, and they are encouraged to help. "If I just fix your lamp,
+        you will need me again next time," Tom explains. "If you fix it with me, you won't."
+
+        Many of the regular visitors are teenagers. Sixteen-year-old Maya first came with a
+        broken pair of headphones. Now she volunteers herself and helps older visitors with
+        their phones and laptops. "At school we learn a lot of theory," she says. "Here I can
+        see straight away whether something works or not. It's the most satisfying feeling."
+
+        The café has also changed the way people in the town think about their things. Last
+        year, the town council reported that the amount of electrical rubbish collected from
+        homes had fallen for the first time in a decade. Tom is careful not to take all the
+        credit, but he is clearly proud. "We didn't invent anything new," he says. "Our
+        grandparents repaired everything. We have simply remembered how to do it."
+        TXT;
+
     private const PASSAGE_DIGITAL = <<<'TXT'
         For most teenagers today, being online is not an activity but a condition. A recent
         study of secondary school students found that the average participant checked their
@@ -676,6 +716,140 @@ class EnglezaContentSeeder extends Seeder
                     'Deci surprinderea vine din ce au declarat elevii — că obiceiul e „tiring", nu plăcut.',
                 ],
                 'explanation' => 'Textul distinge explicit între ce nu a surprins („the number itself") și ce a surprins („what the students said about it"). Structurile „not X but Y" sunt aproape întotdeauna locul de unde se construiește un item de detaliu.',
+            ],
+
+            // ==================== HOLDOUT: simularea Subiectului I ====================
+            // Un text nou, necunoscut elevului, cu întrebări de idee principală,
+            // detaliu și inferență — exact tipologia Subiectului I.
+            [
+                'ref' => 'seed:eng:mock:repair-main-idea',
+                'skill' => 'comprehensiune-scrisa',
+                'type' => ItemType::Mcq,
+                'difficulty' => 3,
+                'points' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'What is the main idea of the text?',
+                    'passage_title' => 'The Repair Café',
+                    'passage' => self::PASSAGE_REPAIR,
+                    'choices' => [
+                        ['key' => 'a', 'text' => 'A volunteer project repairs broken objects, teaches people to fix things themselves and has changed local habits.'],
+                        ['key' => 'b', 'text' => 'Tom Wilkins is a retired electrician who repairs lamps and radios for his neighbours.'],
+                        ['key' => 'c', 'text' => 'The town council has made it illegal to throw away electrical objects.'],
+                        ['key' => 'd', 'text' => 'Teenagers prefer repairing things to learning theory at school.'],
+                    ],
+                ],
+                'answer' => ['correct' => ['a']],
+                'hints' => [
+                    'Ideea principală trebuie să cuprindă tot textul, nu doar un paragraf.',
+                    'Varianta despre Tom e adevărată, dar e doar începutul poveștii. Cea despre consiliul local nu apare deloc în text.',
+                    'Textul vorbește despre trei lucruri: reparațiile, faptul că vizitatorii învață să repare singuri și efectul asupra orașului.',
+                ],
+                'explanation' => 'Varianta corectă rezumă cele trei idei ale textului: reparațiile, învățarea și schimbarea obiceiurilor din oraș. Celelalte sunt capcanele obișnuite: un detaliu prea îngust (Tom), o informație care nu apare în text (legea) și o generalizare pornind de la o singură persoană (Maya).',
+            ],
+            [
+                'ref' => 'seed:eng:mock:repair-detail',
+                'skill' => 'comprehensiune-scrisa',
+                'type' => ItemType::Mcq,
+                'difficulty' => 2,
+                'points' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Why do visitors have to stay while their object is being repaired?',
+                    'passage_title' => 'The Repair Café',
+                    'passage' => self::PASSAGE_REPAIR,
+                    'choices' => [
+                        ['key' => 'a', 'text' => 'So that they learn how to repair it themselves next time.'],
+                        ['key' => 'b', 'text' => 'Because they have to pay the volunteers before they leave.'],
+                        ['key' => 'c', 'text' => 'Because the café is only open for a short time.'],
+                        ['key' => 'd', 'text' => 'Because objects left in the library sometimes get lost.'],
+                    ],
+                ],
+                'answer' => ['correct' => ['a']],
+                'hints' => [
+                    'Caută paragraful care începe cu „But Tom insists…".',
+                    'Citește explicația lui Tom: „If I just fix your lamp, you will need me again next time".',
+                    'Plata nu e obligatorie („the repairs are free"), iar celelalte două motive nu apar în text.',
+                ],
+                'explanation' => 'Tom explică direct: dacă repară el obiectul, vizitatorul va avea nevoie de el și data viitoare; dacă îl repară împreună, nu. Varianta cu plata contrazice textul, pentru că reparațiile sunt gratuite, iar donația e opțională.',
+            ],
+            [
+                'ref' => 'seed:eng:mock:repair-first-day',
+                'skill' => 'comprehensiune-scrisa',
+                'type' => ItemType::Mcq,
+                'difficulty' => 2,
+                'points' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Which statement about the first Saturday is true according to the text?',
+                    'passage_title' => 'The Repair Café',
+                    'passage' => self::PASSAGE_REPAIR,
+                    'choices' => [
+                        ['key' => 'a', 'text' => 'Four people came, but not all of them brought something to repair.'],
+                        ['key' => 'b', 'text' => 'Twenty volunteers repaired about sixty objects.'],
+                        ['key' => 'c', 'text' => 'Nobody came, because there were no posters.'],
+                        ['key' => 'd', 'text' => 'All the visitors brought broken toasters.'],
+                    ],
+                ],
+                'answer' => ['correct' => ['a']],
+                'hints' => [
+                    'Atenție la timp: textul descrie separat prima sâmbătă și situația de „today".',
+                    'Cifrele 20 și 60 se referă la „today", nu la prima zi.',
+                    'Al patrulea vizitator „simply wanted to see what was going on" — deci nu adusese nimic de reparat.',
+                ],
+                'explanation' => 'În prima sâmbătă au venit patru oameni: doi cu prăjitoare, unul cu bicicleta, iar al patrulea doar din curiozitate. Varianta cu 20 de voluntari amestecă trecutul cu prezentul — o capcană frecventă la itemii de detaliu.',
+            ],
+            [
+                'ref' => 'seed:eng:mock:repair-inference',
+                'skill' => 'comprehensiune-scrisa',
+                'type' => ItemType::Mcq,
+                'difficulty' => 4,
+                'points' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'What does Tom mean when he says "We have simply remembered how to do it"?',
+                    'passage_title' => 'The Repair Café',
+                    'passage' => self::PASSAGE_REPAIR,
+                    'choices' => [
+                        ['key' => 'a', 'text' => 'Repairing things is an old habit that people had forgotten, not a new idea.'],
+                        ['key' => 'b', 'text' => 'He learned to repair things from an old book.'],
+                        ['key' => 'c', 'text' => 'Older people are better at repairs than young people.'],
+                        ['key' => 'd', 'text' => 'The café copies a project from another town.'],
+                    ],
+                ],
+                'answer' => ['correct' => ['a']],
+                'hints' => [
+                    'Citește cele două propoziții dinaintea citatului: „We didn\'t invent anything new… Our grandparents repaired everything."',
+                    'Tom compară prezentul cu generația bunicilor. Ce făceau ei și ce s-a pierdut între timp?',
+                    'Ideea lui e că reparatul nu e o invenție, ci un obicei vechi care fusese uitat.',
+                ],
+                'explanation' => 'Tom spune că nu au inventat nimic: bunicii reparau totul, iar ei doar și-au „amintit" cum se face. E o întrebare de inferență: răspunsul nu e scris direct, ci se deduce din propozițiile din jurul citatului. Varianta c generalizează o idee pe care textul nu o susține — Maya, o adolescentă, e unul dintre voluntari.',
+            ],
+            [
+                'ref' => 'seed:eng:mock:connector-therefore',
+                'skill' => 'coeziune-conectori',
+                'type' => ItemType::FillBlanks,
+                'difficulty' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Choose the linking word that fits the meaning of the sentence.',
+                    'stem_template' => 'Tom was tired of seeing good things thrown away; ___, he opened the Repair Café.',
+                    'blanks' => [
+                        ['key' => 'connector', 'options' => ['therefore', 'however', 'although', 'unless']],
+                    ],
+                ],
+                'answer' => ['values' => ['connector' => ['therefore']]],
+                'hints' => [
+                    'Ce relație e între cele două părți ale propoziției: contrast, condiție sau cauză și efect?',
+                    'Prima parte e motivul, a doua e consecința.',
+                    '„Therefore" introduce o consecință. „However" ar introduce un contrast, iar „although" și „unless" nu pot sta după punct și virgulă în această structură.',
+                ],
+                'explanation' => 'Relația e de cauză și efect: pentru că era deranjat de risipă, a deschis cafeneaua. „Therefore" marchează consecința. Conectorii de cauză și efect sunt punctați separat la eseul de la Subiectul II.',
             ],
 
             // ==================== CULTURĂ ====================

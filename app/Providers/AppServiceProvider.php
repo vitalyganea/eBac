@@ -9,6 +9,7 @@ use Illuminate\Foundation\DevCommands;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,7 +17,17 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Parametrii de rută care ajung într-o coloană bigint. Postgres e strict
+        // cu tipurile: `where id = 'x'` nu întoarce zero rânduri, ci aruncă
+        // eroare — un URL modificat de mână dădea 500 în loc de 404.
         //
+        // Stă în register(), nu în boot(): tiparele globale se aplică rutelor
+        // create DUPĂ ele, iar Filament își înregistrează rutele (`{record}`,
+        // `{export}`, `{import}`) în propriul provider.
+        Route::pattern('gap', '[0-9]+');
+        Route::pattern('record', '[0-9]+');
+        Route::pattern('export', '[0-9]+');
+        Route::pattern('import', '[0-9]+');
     }
 
     public function boot(): void

@@ -5,8 +5,8 @@ namespace App\Filament\Resources\ContentReports\Pages;
 use App\Filament\Resources\ContentReports\ContentReportResource;
 use App\Models\ContentReport;
 use App\Models\User;
-use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListContentReports extends ListRecords
@@ -25,18 +25,18 @@ class ListContentReports extends ListRecords
         return [
             'ascunse' => Tab::make('Ascunse automat')
                 ->icon('heroicon-o-eye-slash')
-                ->modifyQueryUsing(fn (Builder $q) => $q->where('status', 'open')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'open')
                     ->whereHasMorph('reportable', [User::class],
                         fn ($u) => $u->whereNotNull('avatar_hidden_at')))
                 ->badgeColor('danger'),
 
             'deschise' => Tab::make('Deschise')
-                ->modifyQueryUsing(fn (Builder $q) => $q->where('status', 'open'))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'open'))
                 ->badge(fn () => ContentReport::where('status', 'open')->count())
                 ->badgeColor('warning'),
 
             'rezolvate' => Tab::make('Rezolvate')
-                ->modifyQueryUsing(fn (Builder $q) => $q->whereIn('status', ['resolved', 'dismissed'])),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('status', ['resolved', 'dismissed'])),
 
             'toate' => Tab::make('Toate'),
         ];

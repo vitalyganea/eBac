@@ -46,7 +46,7 @@ class UserModerationTable
                 TextColumn::make('username_status')
                     ->label('Nume')
                     ->badge()
-                    ->color(fn (string $s) => match ($s) {
+                    ->color(fn (string $state) => match ($state) {
                         'approved' => 'success',
                         'rejected' => 'danger',
                         default => 'warning',

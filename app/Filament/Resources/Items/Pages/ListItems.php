@@ -6,8 +6,8 @@ use App\Enums\ItemStatus;
 use App\Filament\Resources\Items\ItemResource;
 use App\Models\Item;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListItems extends ListRecords
@@ -29,23 +29,23 @@ class ListItems extends ListRecords
         return [
             'suspecti' => Tab::make('Suspecți')
                 ->icon('heroicon-o-exclamation-triangle')
-                ->modifyQueryUsing(fn (Builder $q) => $q
+                ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereHas('stats', fn ($s) => $s->where('needs_review', true)))
                 ->badge(fn () => Item::whereHas('stats', fn ($s) => $s->where('needs_review', true))->count())
                 ->badgeColor('danger'),
 
             'validare' => Tab::make('În validare')
-                ->modifyQueryUsing(fn (Builder $q) => $q->where('status', ItemStatus::Review))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', ItemStatus::Review))
                 ->badge(fn () => Item::where('status', ItemStatus::Review)->count())
                 ->badgeColor('warning'),
 
             'ciorne' => Tab::make('Ciorne')
-                ->modifyQueryUsing(fn (Builder $q) => $q->where('status', ItemStatus::Draft))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', ItemStatus::Draft))
                 ->badge(fn () => Item::where('status', ItemStatus::Draft)->count()),
 
             'necalibrati' => Tab::make('Necalibrați')
                 ->icon('heroicon-o-beaker')
-                ->modifyQueryUsing(fn (Builder $q) => $q
+                ->modifyQueryUsing(fn (Builder $query) => $query
                     ->where('status', ItemStatus::Published)
                     ->where(fn ($q) => $q
                         ->whereDoesntHave('stats')
@@ -57,7 +57,7 @@ class ListItems extends ListRecords
                 ->badgeColor('info'),
 
             'publicati' => Tab::make('Publicați')
-                ->modifyQueryUsing(fn (Builder $q) => $q->where('status', ItemStatus::Published))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', ItemStatus::Published))
                 ->badge(fn () => Item::where('status', ItemStatus::Published)->count())
                 ->badgeColor('success'),
 

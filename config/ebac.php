@@ -36,4 +36,15 @@ return [
         'boss' => 10,
         'mock' => 10,
     ],
+
+    /*
+     * Simularea BAC.
+     *
+     * Bugetul de timp e pe item, nu durata examenului: 180 de minute pentru
+     * zece itemi scurți din bancă ar fi fără sens. Numărul de itemi pe
+     * secțiune vine din `exam_blueprints.structure[].mock_items`.
+     */
+    'mock' => [
+        'minutes_per_item' => (int) env('EBAC_MOCK_MINUTES_PER_ITEM', 3),
+    ],
 ];

@@ -464,7 +464,7 @@ class MathLessonSeeder extends Seeder
                     [
                         'type' => 'example',
                         'title' => 'Exemplu rezolvat',
-                        'problem' => 'Calculează produsul $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix}$.',
+                        'problem' => 'Calculează produsul $\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 5 & 6 \\\\ 7 & 8 \end{pmatrix}$.',
                         'steps' => [
                             ['text' => 'Linia 1 × coloana 1, pentru elementul din stânga sus.', 'latex' => '1 \\cdot 5 + 2 \\cdot 7 = 19'],
                             ['text' => 'Linia 1 × coloana 2.', 'latex' => '1 \\cdot 6 + 2 \\cdot 8 = 22'],
@@ -493,7 +493,7 @@ class MathLessonSeeder extends Seeder
                     [
                         'type' => 'example',
                         'title' => 'Exemplu rezolvat',
-                        'problem' => 'Calculează $\begin{vmatrix} 3 & 5 \\ 2 & 4 \end{vmatrix}$.',
+                        'problem' => 'Calculează $\begin{vmatrix} 3 & 5 \\\\ 2 & 4 \end{vmatrix}$.',
                         'steps' => [
                             ['text' => 'Înmulțim pe diagonala principală.', 'latex' => '3 \\cdot 4 = 12'],
                             ['text' => 'Înmulțim pe diagonala secundară.', 'latex' => '5 \\cdot 2 = 10'],

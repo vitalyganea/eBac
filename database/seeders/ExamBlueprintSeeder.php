@@ -18,7 +18,11 @@ use Illuminate\Database\Seeder;
  *   Limba rusă, Subiectul A    — 8 → 6
  *
  * De aceea structura stă în date și nu în cod: o simulare din 2026 trebuie să
- * rămână reproductibilă după ce se schimbă structura din 2027. Valorile de mai
+ * rămână reproductibilă după ce se schimbă structura din 2027.
+ *
+ * `mock_items` spune câți itemi din bancă reprezintă o secțiune în simulare
+ * (vezi App\Domain\Exams\MockPlan). Secțiunile fără `types` sau cu
+ * `auto_gradable: false` nu se simulează și se declară ca atare. Valorile de mai
  * jos sunt un punct de plecare — confirmă-le din programele oficiale ANCE
  * înainte de a le folosi în simulări cu estimare de notă.
  */
@@ -42,8 +46,13 @@ class ExamBlueprintSeeder extends Seeder
                 'total_points' => 100,
                 'duration_minutes' => 180,
                 'structure' => [
-                    ['name' => 'Itemi cu răspuns scurt', 'items' => 4, 'points' => 20, 'types' => ['numeric', 'mcq']],
-                    ['name' => 'Rezolvare desfășurată', 'items' => 6, 'points' => 80, 'types' => ['next_step', 'order_steps']],
+                    ['name' => 'Itemi cu răspuns scurt', 'items' => 4, 'points' => 20, 'types' => ['numeric', 'mcq'],
+                        'mock_items' => 4],
+                    // La examen, rezolvări complete corectate pe barem. În bancă le
+                    // reprezintă itemii pe pași: pasul următor, ordinea pașilor și
+                    // „unde s-a pierdut punctul".
+                    ['name' => 'Rezolvare desfășurată', 'items' => 6, 'points' => 80,
+                        'types' => ['next_step', 'order_steps', 'find_error'], 'mock_items' => 6],
                 ],
                 'source_url' => 'https://ance.gov.md/clasa-sesiunea-examen/sesiunea-2026-0',
                 'is_active' => true,
@@ -64,16 +73,16 @@ class ExamBlueprintSeeder extends Seeder
                 'duration_minutes' => 180,
                 'structure' => [
                     ['name' => 'Subiectul I', 'items' => 1, 'points' => 25,
-                        'types' => ['mcq', 'numeric', 'fill_blanks'],
+                        'types' => ['mcq', 'numeric', 'fill_blanks'], 'mock_items' => 3,
                         'note' => 'Itemi scurți: tipuri de date, informația, sisteme de numerație, algebră booleană.'],
                     ['name' => 'Subiectul II', 'items' => 1, 'points' => 32,
-                        'types' => ['code_output', 'find_error'],
+                        'types' => ['code_output', 'find_error'], 'mock_items' => 2,
                         'note' => 'Analiză și elaborare de program. Pascal sau C/C++, la alegerea candidatului.'],
                     ['name' => 'Subiectul III', 'items' => 1, 'points' => 30,
-                        'types' => ['order_steps', 'code_output'],
+                        'types' => ['order_steps', 'code_output'], 'mock_items' => 2,
                         'note' => 'Problemă de programare cu date structurate sau subprograme.'],
                     ['name' => 'Subiectul IV', 'items' => 1, 'points' => 13,
-                        'types' => ['match', 'mcq'],
+                        'types' => ['match', 'mcq'], 'mock_items' => 2,
                         'note' => 'Circuite logice / baze de date.'],
                 ],
                 'source_url' => 'https://ance.gov.md/sites/default/files/programa_bac_informatica_romana.pdf',
@@ -101,6 +110,7 @@ class ExamBlueprintSeeder extends Seeder
                         ['name' => 'Subiectul I', 'items' => 1, 'points' => 30,
                             'types' => ['mcq', 'fill_blanks', 'match'],
                             'auto_gradable' => true,
+                            'mock_items' => 5,
                             'note' => 'Comprehensiunea scrisă a unui text nonliterar/funcțional necunoscut de 400-450 de cuvinte.'],
                         ['name' => 'Subiectul II', 'items' => 1, 'points' => 40,
                             'types' => [],
@@ -137,14 +147,17 @@ class ExamBlueprintSeeder extends Seeder
                         ['name' => 'Subiectul I', 'items' => 1, 'points' => 24,
                             'types' => ['mcq', 'match', 'fill_blanks'],
                             'auto_gradable' => true,
+                            'mock_items' => 2,
                             'note' => 'Terminologie și lucru cu sursa scrisă.'],
                         ['name' => 'Subiectul II', 'items' => 1, 'points' => 22,
                             'types' => ['timeline', 'mcq'],
                             'auto_gradable' => true,
+                            'mock_items' => 2,
                             'note' => 'Cronologie, hărți, tabele și diagrame.'],
                         ['name' => 'Subiectul III', 'items' => 1, 'points' => 19,
                             'types' => ['mcq', 'match'],
                             'auto_gradable' => true,
+                            'mock_items' => 2,
                             'note' => 'Comparare de surse, cauzalitate.'],
                         ['name' => 'Subiectul IV', 'items' => 1, 'points' => 35,
                             'types' => [],

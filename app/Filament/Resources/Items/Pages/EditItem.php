@@ -12,6 +12,24 @@ class EditItem extends EditRecord
 {
     protected static string $resource = ItemResource::class;
 
+    /**
+     * Cheia, explicația și indiciile sunt `#[Hidden]` pe model (§2), deci
+     * Filament nu le vede când umple formularul din `attributesToArray()`.
+     *
+     * Fără pasul ăsta, formularul de editare se deschidea cu ele goale: salvarea
+     * eșua pe „answer obligatoriu", iar dacă n-ar fi eșuat, ar fi șters
+     * explicația și indiciile itemului editat.
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        return [
+            ...$data,
+            'answer' => $this->record->answer,
+            'explanation' => $this->record->explanation,
+            'hints' => $this->record->hintList(),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Domain\Grading\AnswerKeyMask;
 use App\Models\Item;
 use App\Models\SessionItem;
 use Illuminate\Http\Request;
@@ -84,14 +85,11 @@ class ItemForStudentResource extends JsonResource
             $payload['hint'], $payload['hints'],
         );
 
-        // La itemii cu variante, ordinea se amestecă pe server dacă itemul o cere,
-        // ca poziția răspunsului corect să nu fie ghicibilă din structura datelor.
-        if (! empty($payload['shuffle']) && ! empty($payload['choices']) && is_array($payload['choices'])) {
-            $choices = $payload['choices'];
-            shuffle($choices);
-            $payload['choices'] = $choices;
-        }
+        // Cheile variantelor și ale pașilor se maschează, iar ordinea se
+        // amestecă: autorii scriu varianta corectă prima și pașii în ordinea
+        // bună, deci forma din bancă ar fi chiar răspunsul (vezi AnswerKeyMask).
+        $seed = $this->sessionItem?->id ?? 'u'.(request()->user()?->id ?? 0);
 
-        return $payload;
+        return app(AnswerKeyMask::class)->maskPayload($this->resource, $payload, (string) $seed);
     }
 }

@@ -3,8 +3,10 @@
 use App\Domain\Grading\GraderRegistry;
 use App\Enums\ItemType;
 use App\Models\Item;
+use App\Models\Lesson;
 use App\Models\Skill;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 
 uses(RefreshDatabase::class);
 
@@ -269,4 +271,37 @@ it('acordă punctaj maxim răspunsului construit din cheia de corectare', functi
     expect($probleme)->toBeEmpty(
         "Itemi pe care propria lor cheie nu îi rezolvă:\n  ".implode("\n  ", $probleme)
     );
+});
+
+it('matricele și sistemele din LaTeX au trecerile la rând scrise corect', function () {
+    // În PHP, '\\' între apostrofuri dă UN backslash. Un autor care scrie
+    // '4 & 3 \\ 5 & 6' obține în bază `4 & 3 \ 5 & 6`: pentru KaTeX, `\ ` e
+    // un spațiu, iar matricea se afișează pe un singur rând. KaTeX nu dă
+    // eroare — elevul vede pur și simplu o problemă greșită. Corect: '\\\\'.
+    $mediu = '/\\\\begin\{((?:[pbvBV])?matrix|cases|array|aligned)\}(.*?)\\\\end\{\1\}/s';
+    $probleme = [];
+
+    $verifica = function (string $ref, mixed $continut) use ($mediu, &$probleme) {
+        foreach (Arr::flatten(Arr::wrap($continut)) as $sir) {
+            if (! is_string($sir) || ! preg_match_all($mediu, $sir, $m)) {
+                continue;
+            }
+            foreach ($m[2] as $i => $corp) {
+                // Un `\` urmat de spațiu care NU face parte dintr-un `\\`.
+                if (in_array($m[1][$i], ['matrix', 'pmatrix', 'bmatrix', 'vmatrix', 'Bmatrix', 'Vmatrix', 'cases'], true)
+                    && preg_match('/(?<!\\\\)\\\\\s/', $corp)) {
+                    $probleme[] = "{$ref}: {$m[1][$i]} cu `\\ ` în loc de `\\\\` — se afișează pe un singur rând";
+                }
+            }
+        }
+    };
+
+    foreach (Item::all() as $item) {
+        $verifica($item->source_ref, [$item->payload, $item->gradingKey(), $item->explanation, $item->hintList()]);
+    }
+    foreach (Lesson::all() as $lesson) {
+        $verifica("lecția {$lesson->id}", $lesson->blocks);
+    }
+
+    expect($probleme)->toBeEmpty(implode("\n", $probleme));
 });

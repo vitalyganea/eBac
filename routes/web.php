@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\Auth\UsernameController;
 use App\Http\Controllers\Web\CourseController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\GapController;
+use App\Http\Controllers\Web\MockExamController;
 use App\Http\Controllers\Web\PracticeController;
 use App\Http\Controllers\Web\Pub\ExamController;
 use App\Http\Controllers\Web\Pub\PublicController;
@@ -122,6 +123,13 @@ Route::middleware(['auth', 'username.ok'])->group(function () {
     Route::get('/disciplina/{slug}/curs/{skill}', [CourseController::class, 'show'])->name('course.show');
     Route::post('/disciplina/{slug}/curs/{skill}/parcurs', [CourseController::class, 'complete'])
         ->name('course.complete');
+
+    // Simularea BAC: structura examenului, itemi de holdout, termen pe server.
+    Route::post('/simulare', [MockExamController::class, 'start'])
+        ->middleware('throttle:10,1')
+        ->name('mock.start');
+    Route::post('/antrenament/{session:uuid}/preda', [MockExamController::class, 'submit'])
+        ->name('mock.submit');
 
     Route::post('/antrenament', [PracticeController::class, 'start'])->name('practice.start');
     Route::get('/antrenament/{session:uuid}', [PracticeController::class, 'play'])->name('practice.play');
