@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             IstorieContentSeeder::class,
             IstorieLessonSeeder::class,
             RomanaContentSeeder::class,
+            RomanaLessonSeeder::class,
         ]);
     }
 }

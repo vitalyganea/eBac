@@ -333,3 +333,18 @@ it('itemii disciplinelor auditate trimit la un document oficial ANCE', function 
 
     expect($probleme)->toBeEmpty(implode("\n", $probleme));
 });
+
+/**
+ * Testul ANCE cere să rezolvi sarcini; nu întreabă niciodată cum se notează.
+ * Un item „câte puncte primește…" antrenează o întrebare care nu apare la
+ * examen — informația despre barem stă în lecții, nu în Teste.
+ */
+it('nicio întrebare nu întreabă despre punctaj sau barem', function () {
+    $probleme = Item::servable()->get()
+        ->filter(fn (Item $item) => preg_match('~(câte puncte|\bbarem)~iu', (string) ($item->payload['stem'] ?? '')))
+        ->map(fn (Item $item) => "{$item->source_ref}: {$item->payload['stem']}")
+        ->values()
+        ->all();
+
+    expect($probleme)->toBeEmpty(implode("\n", $probleme));
+});

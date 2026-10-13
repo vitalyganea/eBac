@@ -44,6 +44,26 @@ class RomanaContentSeeder extends Seeder
         $skills = $this->seedSkills($subject->id);
         $this->seedPrerequisites($skills);
         $this->seedItems($subject->id, $skills);
+        $this->retire();
+    }
+
+    /**
+     * Itemi scoși din antrenament. Întrebau despre barem („câte puncte
+     * primește…"), nu despre materie — la BAC nu apare o asemenea întrebare.
+     * Informația s-a mutat în lecția „Cum se notează eseul și redactarea"
+     * (RomanaLessonSeeder). Se retrag, nu se șterg: `attempts` îi referă (§1).
+     */
+    private function retire(): void
+    {
+        $refs = [
+            self::ance('u_sb25', 9)['ref'],
+            self::ance('u_ss24', 15)['ref'],
+            self::ance('u_sb25', 'redactare')['ref'],
+        ];
+
+        Item::whereIn('source_ref', $refs)
+            ->where('status', '!=', ItemStatus::Retired)
+            ->each(fn (Item $item) => $item->update(['status' => ItemStatus::Retired]));
     }
 
     /** @return array<string, Skill> */
@@ -644,7 +664,6 @@ class RomanaContentSeeder extends Seeder
     {
         $dramatic = self::ance('u_sb24', 13);
         $epic = self::ance('r_sb26', 8);
-        $epicRule = self::ance('u_sb25', 9);
         $stil = self::ance('r_sb26', 3);
 
         return [
@@ -690,16 +709,6 @@ class RomanaContentSeeder extends Seeder
                 "Fragmentul e din Pomul vieții de Dumitru Matcovschi, iar baremul ANCE ({$dramatic['label']}) cere tocmai argumentarea apartenenței la genul dramatic: expunere directă prin replici, replici precedate de numele personajelor, indicații scenice, conflict.",
                 1,
                 "GRIGORE: Care este vina mea, s-o știu?\nNICHITA: Pe mata nimeni nu te învinuiește de nimic.\n— Dumitru Matcovschi, Pomul vieții"),
-            self::choice($epicRule, 'genuri-literare',
-                'La itemul „Argumentează apartenența fragmentului la genul epic, în două teze (raționament + exemplu)", câte puncte primește un exemplu din text fără raționament?',
-                ['0 puncte', '1 punct', '2 puncte', 'punctajul întreg al tezei'],
-                [0],
-                [
-                    'Baremul cere raționament ȘI exemplu. Gândește-te care dintre ele e argumentul propriu-zis.',
-                    'Un citat singur nu explică de ce textul e epic.',
-                    'Raționamentul fără exemplu primește 1 punct; invers, nimic.',
-                ],
-                "Baremul ANCE ({$epicRule['label']}): „Se va acorda 1 punct pentru raționamentul neînsoțit de exemplu; 0 puncte pentru exemplu fără raționament.” Același principiu apare și la itemul despre genul dramatic."),
             self::choice($stil, 'stiluri-functionale',
                 'În ce stil funcțional se încadrează fragmentul?',
                 ['stilul beletristic (artistic)', 'stilul științific', 'stilul publicistic', 'stilul oficial-administrativ'],
@@ -713,7 +722,7 @@ class RomanaContentSeeder extends Seeder
                 1,
                 "„Clădirile impunătoare din calcar orbitor, bisericile înalte până la cerul sleit, străzile pavate pline de trăsuri cu vizitii mânioși...”\n— George Cornilă, Hasdeu: duhuri"),
             self::choice(self::ance('r_sb26', 3, '-trasaturi'), 'stiluri-functionale',
-                'Care dintre următoarele este o trăsătură a stilului beletristic, așa cum o numește baremul ANCE?',
+                'Care dintre următoarele este o trăsătură a stilului beletristic?',
                 [
                     'bogăția figurilor de stil',
                     'terminologia de specialitate și exprimarea neutră',
@@ -738,26 +747,25 @@ class RomanaContentSeeder extends Seeder
         $anunt26 = self::ance('u_ss26', 11);
         $invitatie26 = self::ance('u_sb26', 11);
         $invitatie25 = self::ance('r_sb25', 10);
-        $eseu = self::ance('u_ss24', 15);
         $rezumat = self::ance('r_sb23', 3);
 
         return [
             self::choice($anunt21, 'scriere-functionala',
-                'Cu ce începe textul unui anunț, potrivit baremului ANCE?',
+                'Cu ce începe textul unui anunț?',
                 ['cu denumirea documentului — cuvântul ANUNȚ', 'cu o formulă de adresare („Stimați colegi,")', 'cu data și semnătura', 'cu scopul evenimentului'],
                 [0],
                 [
-                    'Baremul punctează separat „denumirea documentului".',
+                    'Gândește-te la titlul textului.',
                     'Cititorul trebuie să știe din primul cuvânt ce fel de text are în față.',
                     'Formula de adresare ține de invitație, nu de anunț.',
                 ],
                 'Baremul ANCE 2021 punctează „elaborarea unui anunț, cu plasarea cuvântului respectiv în startul textului”, iar baremele din 2022–2026 dau 1 punct pentru denumirea documentului.'),
             self::choice($anunt26, 'scriere-functionala',
-                'Legenda: Cătălin/Cătălina Popescu, Liceul Teoretic „Marin Preda” din Râșcani, organizează cu Consiliul elevilor un atelier de discuție pe tema „Biblioteca – spațiu al cunoașterii”, în Sala de festivități a liceului, pe 11 august 2026, la ora 10:00. Ce element punctat de barem lipsește din anunțul de mai jos?',
+                'Legenda: Cătălin/Cătălina Popescu, Liceul Teoretic „Marin Preda” din Râșcani, organizează cu Consiliul elevilor un atelier de discuție pe tema „Biblioteca – spațiu al cunoașterii”, în Sala de festivități a liceului, pe 11 august 2026, la ora 10:00. Ce element obligatoriu lipsește din anunțul de mai jos?',
                 ['timpul desfășurării', 'denumirea documentului', 'locul desfășurării', 'nominalizarea organizatorilor', 'semnătura'],
                 [0],
                 [
-                    'Baremul punctează: denumirea documentului, a evenimentului, timpul, locul, organizatorii, marginea și alineatele, semnătura.',
+                    'Un anunț complet are: denumirea documentului, a evenimentului, timpul, locul, organizatorii, marginea și alineatele, semnătura.',
                     'Bifează în anunț fiecare element din listă.',
                     'Când are loc atelierul?',
                 ],
@@ -765,11 +773,11 @@ class RomanaContentSeeder extends Seeder
                 2,
                 "ANUNȚ\nConsiliul elevilor al Liceului Teoretic „Marin Preda” din orașul Râșcani organizează atelierul de discuție „Biblioteca – spațiu al cunoașterii”. Atelierul se va desfășura în Sala de festivități a liceului.\nVă așteptăm!\nCătălin Popescu"),
             self::choice($invitatie26, 'scriere-functionala',
-                'Legenda: Gabriel/Gabriela Iorga, clasa a XI-a, Liceul Teoretic „Tudor Arghezi” din Ungheni, organizează în liceu activitatea „Inima mea e Moldova”, în vederea promovării valorilor și a identității naționale, pe 20 iunie 2026, la ora 15.00. Ce element punctat de barem lipsește din invitație?',
+                'Legenda: Gabriel/Gabriela Iorga, clasa a XI-a, Liceul Teoretic „Tudor Arghezi” din Ungheni, organizează în liceu activitatea „Inima mea e Moldova”, în vederea promovării valorilor și a identității naționale, pe 20 iunie 2026, la ora 15.00. Ce element obligatoriu lipsește din invitația de mai jos?',
                 ['scopul activității', 'formula de adresare', 'timpul', 'semnătura'],
                 [0],
                 [
-                    'Baremul invitației punctează: formula de adresare, activitatea, scopul, locul, timpul, marginea și alineatele, semnătura.',
+                    'O invitație completă are: formula de adresare, activitatea, scopul, locul, timpul, marginea și alineatele, semnătura.',
                     'Legenda spune nu doar CE se organizează, ci și DE CE.',
                     'Pentru ce se organizează activitatea? Invitația nu spune.',
                 ],
@@ -777,7 +785,7 @@ class RomanaContentSeeder extends Seeder
                 2,
                 "INVITAȚIE\nDragi colegi,\nVă invit la activitatea „Inima mea e Moldova”, care va avea loc pe 20 iunie 2026, la ora 15.00, în incinta Liceului Teoretic „Tudor Arghezi”.\nVă aștept cu drag!\nGabriela Iorga"),
             self::choice($invitatie25, 'scriere-functionala',
-                'Ce element punctează baremul ANCE la INVITAȚIE, dar nu și la anunț?',
+                'Ce element e obligatoriu într-o INVITAȚIE, dar nu și într-un anunț?',
                 ['formula de adresare', 'indicarea locului', 'semnătura', 'respectarea marginii și a alineatelor'],
                 [0],
                 [
@@ -787,7 +795,7 @@ class RomanaContentSeeder extends Seeder
                 ],
                 "Baremul ANCE ({$invitatie25['label']}) dă „1 punct pentru prezența formulei de adresare”; baremele pentru anunț punctează în schimb denumirea documentului. Locul, semnătura și marginile se punctează la ambele."),
             self::choice($rezumat, 'rezumat',
-                'Ce cere baremul ANCE la itemul „Rezumă, în trei enunțuri, esența dialogului"?',
+                'Sarcina: „Rezumă, în trei enunțuri, esența dialogului.” Cum trebuie scris rezumatul?',
                 [
                     'ideile esențiale, fără citate, cu pronume și verbe la persoana a III-a',
                     'ideile esențiale, cu citatele-cheie din dialog',
@@ -801,24 +809,8 @@ class RomanaContentSeeder extends Seeder
                     'Rezumatul se scrie ca o relatare despre alții: el/ea, ei.',
                 ],
                 "Baremul ANCE ({$rezumat['label']}): 2 puncte pentru redarea ideilor esențiale fără citate, 1 punct pentru pronume și verbe la persoana a III-a, 1 punct pentru coerență, 1 punct pentru respectarea limitei de întindere."),
-            self::choice($eseu, 'eseu',
-                'Care reper al eseului argumentativ are cel mai mare punctaj în baremul ANCE?',
-                [
-                    'referința la două texte din literatura română care confirmă tezele',
-                    'exprimarea clară a opiniei',
-                    'formularea a două teze distincte',
-                    'respectarea structurii eseului argumentativ',
-                ],
-                [0],
-                [
-                    'Eseul valorează 20 de puncte la umanist (2024): opinia 2, tezele 4, argumentele 4, structura 3, limita 1. Cât rămâne?',
-                    'Rămân 6 puncte — câte 3 pentru fiecare dintre cele două texte.',
-                    'Fiecare text literar se punctează cu titlu, autor și referință directă la text.',
-                ],
-                "Baremul ANCE ({$eseu['label']}): opinia 2 p, două teze 4 p, câte un argument pentru fiecare teză 4 p, referința la două texte literare 6 p (3 + 3: titlu, autor, referință directă la text), structura 3 p, limita de întindere 1 p.",
-                3),
             self::choice(self::ance('u_ss24', 15, '-structura'), 'eseu',
-                'Pentru ce acordă baremul ANCE cele 3 puncte la „respectarea structurii eseului argumentativ"?',
+                'Ce face ca un eseu argumentativ să fie bine structurat?',
                 [
                     'conectori logici, structurare în alineate, aspect grafic îngrijit',
                     'introducere, cuprins și încheiere de lungimi egale',
@@ -827,34 +819,23 @@ class RomanaContentSeeder extends Seeder
                 ],
                 [0],
                 [
-                    'Baremul împarte cele 3 puncte în trei elemente de câte 1 punct.',
+                    'Sunt trei elemente: unul ține de limbaj, două de felul în care arată pagina.',
                     'Ce face ca un text să se citească drept un raționament legat, pe idei separate?',
                     'Cuvintele care leagă ideile (în primul rând, prin urmare), alineatele și scrisul îngrijit.',
                 ],
-                'Baremul ANCE (BAC 2024, sesiunea suplimentară, profil umanist, itemul 15): „utilizarea conectorilor specifici/logici – 1 punct; structurarea în alineate – 1 punct; aspectul grafic îngrijit/lizibil – 1 punct”.',
+                'Baremul ANCE (BAC 2024, sesiunea suplimentară, profil umanist, itemul 15): „utilizarea conectorilor specifici/logici – 1 punct; structurarea în alineate – 1 punct; aspectul grafic îngrijit/lizibil – 1 punct”. Din 2026, la profilul real, structura cere în plus o concluzie corelată cu argumentele.',
                 3),
             self::choice(self::ance('u_ss24', 15, '-referinta'), 'eseu',
-                'Ce trebuie să conțină referința la un text literar în eseu, ca să primească punctajul întreg (3 puncte)?',
+                'Ce trebuie să conțină referința la un text literar într-un eseu argumentativ?',
                 ['titlul, autorul și o referință directă la text', 'doar titlul și autorul', 'un rezumat al operei', 'o opinie a unui critic literar'],
                 [0],
                 [
-                    'Baremul împarte cele 3 puncte pe trei elemente.',
+                    'Sunt trei elemente.',
                     'Două dintre ele identifică opera. Al treilea arată că o cunoști.',
                     'Referința directă: o situație, un personaj sau un citat din text.',
                 ],
                 'Baremul ANCE (BAC 2024, sesiunea suplimentară, profil umanist, itemul 15): 6 (3 + 3) puncte pentru referința la două texte din literatura română „(titlu, autor, referinţă directă la text)”.',
                 2),
-            self::choice(self::ance('u_sb25', 'redactare'), 'eseu',
-                'Câte puncte se acordă la proba de limba română pentru redactarea tuturor secvențelor scrise?',
-                ['20 de puncte', '10 puncte', '24 de puncte', '5 puncte'],
-                [0],
-                [
-                    'Redactarea se punctează separat de conținutul răspunsurilor.',
-                    'Are cinci criterii: organizarea ideilor, analiza, stilul, ortografia și gramatica, punctuația.',
-                    'Criteriile valorează 2 + 3 + 5 + 5 + 5 puncte.',
-                ],
-                'Testul ANCE (BAC 2025, sesiunea de bază, profil umanist): „Pentru redactarea tuturor secvenţelor scrise vei obţine 20 de puncte” — organizarea ideilor și limita de întindere 2, analiza 3, corectitudinea stilistică 5, normele ortografice și gramaticale 5, punctuația 5.',
-                1),
         ];
     }
 }

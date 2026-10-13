@@ -464,6 +464,11 @@ Convenția: `source` = `ance:<fișier>` (ex. `ance:12_llro_barem_r_sb26`),
 acceptă baremul, nu o variantă aleasă de noi. Textele literare se citează doar
 pe scurt (o propoziție), cu autorul și opera.
 
+Itemii întreabă MATERIA, nu baremul: testul ANCE nu întreabă niciodată „câte
+puncte primește…". Cum se notează proba e strategie utilă elevului, deci stă în
+lecții (`RomanaLessonSeeder`), iar `ContentIntegrityTest` respinge enunțurile
+despre punctaj sau barem.
+
 `ContentIntegrityTest` verifică regula pe disciplinele auditate (lista
 `$auditate`), care crește pe măsură ce se face auditul. Starea la 2026-10-13:
 limba română e construită integral din teste ANCE; cei 325 de itemi de la

@@ -54,6 +54,15 @@ function escapeHtml(s: string): string {
     );
 }
 
+/**
+ * Text simplu, escapat, cu `**accent**` → <strong>. Lecțiile și explicațiile
+ * folosesc accentul de la început, dar era afișat literal, cu steluțe.
+ * Înlocuirea se face DUPĂ escapare, deci nu poate introduce alt markup.
+ */
+function prose(s: string): string {
+    return escapeHtml(s).replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+}
+
 function render(tex: string, displayMode: boolean): string {
     if (!katex.value) {
         return escapeHtml(tex);
@@ -82,7 +91,7 @@ const html = computed(() => {
     }
 
     if (!needsMath.value) {
-        return escapeHtml(props.text);
+        return prose(props.text);
     }
 
     // Împărțim pe $...$ și randăm doar segmentele matematice; restul se escapează.
@@ -91,7 +100,7 @@ const html = computed(() => {
         .map((part) =>
             part.startsWith('$') && part.endsWith('$') && part.length > 2
                 ? render(part.slice(1, -1), false)
-                : escapeHtml(part),
+                : prose(part),
         )
         .join('');
 });
