@@ -1,0 +1,58 @@
+# Servicii locale de dezvoltare pentru eBac.
+#
+# Porturile sunt DELIBERAT diferite de cele implicite: pe mașina asta rulează și
+# alte proiecte (crm-redis ocupă 6379, crm-mariadb ocupă 3306). Așa pot rula
+# ambele stive în paralel, fără conflicte.
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: ebac-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-ebac}
+      POSTGRES_USER: ${DB_USERNAME:-ebac}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8'
+    ports:
+      - '${DB_PORT:-5433}:5432'
+    # Postgres 18+ vrea UN SINGUR mount la /var/lib/postgresql, nu la
+    # /var/lib/postgresql/data: imaginea pune datele într-un subdirector cu
+    # numele versiunii majore, ca `pg_upgrade --link` să funcționeze fără să
+    # traverseze granița de mount.
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-ebac} -d ${DB_DATABASE:-ebac}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Valkey în loc de Redis: licență BSD (Linux Foundation), protocol identic.
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: ebac-valkey
+    restart: unless-stopped
+    command: valkey-server --appendonly yes --save 60 1000
+    ports:
+      - '${REDIS_PORT:-6380}:6379'
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ebac-mailpit
+    restart: unless-stopped
+    ports:
+      - '${MAIL_PORT:-1025}:1025'   # SMTP
+      - '8025:8025'                 # UI web
+    environment:
+      MP_MAX_MESSAGES: 500
+
+volumes:
+  pgdata:
+  valkeydata:

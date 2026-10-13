@@ -1,0 +1,23 @@
+# eBac — pregătire pentru bacalaureatul din Republica Moldova
+
+User-agent: *
+
+# Aplicația propriu-zisă nu se indexează: sunt pagini personale, cu sesiuni de
+# antrenament identificate prin UUID. Nu au valoare pentru căutare și nu au ce
+# căuta în rezultate.
+Disallow: /panou
+Disallow: /antrenament
+Disallow: /disciplinele-mele
+Disallow: /intra
+Disallow: /inregistrare
+
+# Zone administrative și de monitorizare.
+Disallow: /admin
+Disallow: /horizon
+Disallow: /pulse
+Disallow: /storage/
+Disallow: /api/
+
+Allow: /
+
+Sitemap: https://ebac.md/sitemap.xml
