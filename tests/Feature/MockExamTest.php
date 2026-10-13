@@ -89,20 +89,21 @@ it('pornește o simulare completă la fiecare disciplină cu conținut', functio
             }
         }
     }
-})->with(['matematica', 'informatica', 'limba-engleza', 'istoria']);
+})->with(['matematica', 'informatica', 'limba-engleza']);
 
-it('refuză cinstit simularea unei probe integral cu răspuns deschis', function () {
-    // Limba română: fiecare item ANCE se corectează pe barem, deci simularea
-    // n-ar avea ce nota — chiar dacă banca are itemi de antrenament.
-    expect(fn () => app(StartMock::class)($this->user, ($this->subject)('limba-romana')->id))
+it('refuză cinstit simularea unei probe integral cu răspuns deschis', function (string $slug) {
+    // Limba română și istoria: fiecare sarcină ANCE se corectează pe barem,
+    // deci simularea n-ar avea ce nota — chiar dacă banca are itemi de
+    // antrenament.
+    expect(fn () => app(StartMock::class)($this->user, ($this->subject)($slug)->id))
         ->toThrow(MockUnavailable::class, 'integral pe barem');
 
     $this->actingAs($this->user)
-        ->get(route('subject.show', 'limba-romana'))
+        ->get(route('subject.show', $slug))
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->where('sections.mock.available', false)
             ->where('sections.mock.reason', fn (string $r) => str_contains($r, 'integral pe barem')));
-});
+})->with(['limba-romana', 'istoria']);
 
 it('profilul alege structura, dar nu blochează accesul (§2a)', function () {
     $istoria = ($this->subject)('istoria');
@@ -216,7 +217,7 @@ it('declară cinstit ce nu se corectează automat (§13)', function () {
 });
 
 it('preferă întrebările nevăzute și declară reutilizarea', function () {
-    $subject = ($this->subject)('istoria');
+    $subject = ($this->subject)('informatica');
 
     $first = app(StartMock::class)($this->user, $subject->id);
     $this->actingAs($this->user)->post(route('mock.submit', $first->uuid));
@@ -299,7 +300,7 @@ it('pornește oricâte simulări la rând, la fiecare disciplină', function (st
     }
 
     expect(PracticeSession::where('user_id', $this->user->id)->where('mode', SessionMode::Mock)->count())->toBe(8);
-})->with(['matematica', 'informatica', 'limba-engleza', 'istoria']);
+})->with(['matematica', 'informatica', 'limba-engleza']);
 
 it('simulează matematica și la profilul umanist, cu structura lui', function () {
     // Testul ANCE de la umanist are alte capitole decât cel de la real

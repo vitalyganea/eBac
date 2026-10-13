@@ -473,10 +473,14 @@ despre punctaj sau barem.
 
 `ContentIntegrityTest` verifică regula pe disciplinele auditate (lista
 `$auditate`), care crește pe măsură ce se face auditul. Starea la 2026-10-13:
-limba română, matematica și informatica sunt construite din teste ANCE
-(testele 2024–2026, `database/seeders/Matematica` și `Informatica`); itemii
-vechi, fără sursă, sunt retrași, nu șterși. Cei 113 itemi de la engleză și
-istorie sunt încă scriși original și trebuie auditați.
+limba română, matematica, informatica și istoria sunt construite din teste
+ANCE (testele 2024–2026, `database/seeders/Matematica`, `Informatica`,
+`Istorie`); itemii vechi, fără sursă, sunt retrași, nu șterși. Cei 88 de itemi
+de la engleză sunt încă scriși original și trebuie auditați.
+
+La istorie, ca la română, toată proba se corectează pe barem; în Teste se
+exersează doar sarcinile „Identifică în sursă", cu sursa reală din test,
+citată pe scurt, și cu răspunsurile din barem.
 
 La informatică, „ce afișează programul" se SCRIE, ca la examen, nu se alege
 dintr-o listă — variantele greșite ar fi inventate. Itemii numerici și de

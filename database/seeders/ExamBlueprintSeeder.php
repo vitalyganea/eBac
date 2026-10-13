@@ -162,12 +162,14 @@ class ExamBlueprintSeeder extends Seeder
         }
 
         if ($istoria) {
-            // Programa ANCE 2021: 4 subiecte, 24 + 22 + 19 + 35 = 100 de puncte,
-            // 180 de minute. Obligatorie la profil umanist.
-            //
-            // Subiectul al IV-lea (35 de puncte, cel mai mare) cere răspuns extins
-            // argumentat pe 2-3 surse — nu e auto-corectabil. Restul sunt itemi
-            // pe surse, hărți și tabele, majoritatea automatizabili.
+            // Testele ANCE din 2026 (12_ist_test_u_ro_sb26.pdf): 4 subiecte,
+            // 24 + 22 + 19 + 35 = 100 de puncte, 180 de minute. Fiecare sarcină
+            // — explicarea unui termen, compararea opiniilor, harta, eseul — se
+            // corectează pe barem; chiar și „Identifică în sursă" cere două
+            // răspunsuri formulate de elev. Proba nu se simulează automat, la fel
+            // ca limba română: sarcinile de identificare se exersează în Teste.
+            $barem = 'Se corectează pe barem, cu răspuns deschis.';
+
             foreach ([ExamProfile::Umanist, ExamProfile::Real] as $profile) {
                 ExamBlueprint::updateOrCreate([
                     'subject_id' => $istoria->id,
@@ -178,27 +180,13 @@ class ExamBlueprintSeeder extends Seeder
                     'total_points' => 100,
                     'duration_minutes' => 180,
                     'structure' => [
-                        ['name' => 'Subiectul I', 'items' => 1, 'points' => 24,
-                            'types' => ['mcq', 'match', 'fill_blanks'],
-                            'auto_gradable' => true,
-                            'mock_items' => 2,
-                            'note' => 'Terminologie și lucru cu sursa scrisă.'],
-                        ['name' => 'Subiectul II', 'items' => 1, 'points' => 22,
-                            'types' => ['timeline', 'mcq'],
-                            'auto_gradable' => true,
-                            'mock_items' => 2,
-                            'note' => 'Cronologie, hărți, tabele și diagrame.'],
-                        ['name' => 'Subiectul III', 'items' => 1, 'points' => 19,
-                            'types' => ['mcq', 'match'],
-                            'auto_gradable' => true,
-                            'mock_items' => 2,
-                            'note' => 'Comparare de surse, cauzalitate.'],
-                        ['name' => 'Subiectul IV', 'items' => 1, 'points' => 35,
-                            'types' => [],
-                            'auto_gradable' => false,
-                            'note' => 'Răspuns extins argumentat pe 2-3 surse. Cere autoevaluare pe barem.'],
+                        ['name' => 'Subiectul I: două surse scrise', 'items' => 5, 'points' => 24, 'auto_gradable' => false, 'note' => $barem],
+                        ['name' => 'Subiectul II: o sursă scrisă', 'items' => 5, 'points' => 22, 'auto_gradable' => false, 'note' => $barem],
+                        ['name' => 'Subiectul III: harta', 'items' => 3, 'points' => 19, 'auto_gradable' => false, 'note' => $barem],
+                        ['name' => 'Subiectul IV: eseu pe o sursă', 'items' => 1, 'points' => 35, 'auto_gradable' => false,
+                            'note' => 'Eseu de o pagină, punctat pe criteriile din test: argumente, relații cauză-efect, integrarea sursei, plasarea în timp și spațiu, plan logic, limbaj istoric.'],
                     ],
-                    'source_url' => 'https://ance.gov.md/sites/default/files/programa_bac_istoria_romanilor_si_universala_romana.pdf',
+                    'source_url' => 'https://ance.gov.md/sites/default/files/12_ist_test_u_ro_sb26.pdf',
                     'is_active' => true,
                 ]);
             }

@@ -135,7 +135,7 @@ pentru că ar vedea cheile de corectare.
 | Conținut: matematică (real și umanist) | 20 de competențe, 168 de itemi din testele și baremele ANCE 2024–2026, plus 28 de variante rezervate simulării |
 | Conținut: informatică | 16 competențe, 50 de sarcini din testele și baremele ANCE 2024–2026 (cod Pascal și C++), plus 16 variante rezervate simulării |
 | Conținut: limba engleză | 11 competențe, 11 muchii, 20 itemi, nivel B1 |
-| Conținut: istorie | 12 competențe, 12 muchii, 19 itemi, itemi pe surse |
+| Conținut: istorie | 12 competențe, 23 de sarcini „Identifică în sursă” din testele ANCE 2024–2026, cu sursele reale din test; proba se corectează integral pe barem |
 | Conținut: limba și literatura română | 8 competențe, 45 de itemi din testele și baremele ANCE 2021–2026, o lecție despre notare |
 | Poartă automată de calitate pe itemi | ✅ 8 verificări structurale |
 | Suprafață publică SEO (Blade, zero JS) | ✅ 48 URL-uri în sitemap |
@@ -146,7 +146,7 @@ pentru că ar vedea cheile de corectare.
 | Încărcare de avatare (reencodare, EXIF eliminat) | ✅ |
 | Moderare: pre-aprobare nume + avatar, filtru automat, raportare | ✅ |
 | Istoric privat al dificultăților, pe blocuri și teme | ✅ |
-| Simulare BAC: structura examenului, holdout, termen pe server | ✅ matematică, informatică, engleză, istorie |
+| Simulare BAC: structura examenului, holdout, termen pe server | ✅ matematică, informatică, engleză; română și istorie se corectează integral pe barem |
 | Teste (Pest) | ✅ 300+, inclusiv toate rutele × toate rolurile |
 
 ## Ce urmează
