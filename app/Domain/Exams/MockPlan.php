@@ -27,12 +27,14 @@ final readonly class MockPlan
         public ExamBlueprint $blueprint,
         public array $autoSections,
         public array $manualSections,
+        public bool $declaredManual,
     ) {}
 
     public static function fromBlueprint(ExamBlueprint $blueprint): self
     {
         $auto = [];
         $manual = [];
+        $declaredManual = true;
 
         foreach ($blueprint->structure ?? [] as $section) {
             $types = array_values((array) ($section['types'] ?? []));
@@ -41,6 +43,7 @@ final readonly class MockPlan
             // Fără tipuri de item declarate nu avem ce servi, indiferent de
             // flag: o secțiune „auto" fără tipuri ar fi tăcut punctaj pierdut.
             $isAuto = ($section['auto_gradable'] ?? true) && $types !== [];
+            $declaredManual = $declaredManual && ($section['auto_gradable'] ?? true) === false;
 
             if ($isAuto) {
                 $auto[] = [
@@ -59,7 +62,7 @@ final readonly class MockPlan
             }
         }
 
-        return new self($blueprint, $auto, $manual);
+        return new self($blueprint, $auto, $manual, $declaredManual && $manual !== []);
     }
 
     public function itemCount(): int
@@ -89,6 +92,16 @@ final readonly class MockPlan
     public function isSimulable(): bool
     {
         return $this->autoSections !== [];
+    }
+
+    /**
+     * Toată proba e declarată cu răspuns deschis (limba română: fiecare item se
+     * corectează pe barem). Diferit de „fără conținut încă": aici nu lipsesc
+     * întrebările, ci nu există o parte pe care s-o putem nota automat.
+     */
+    public function isFullyManual(): bool
+    {
+        return $this->declaredManual;
     }
 
     /** Rezumatul pentru interfață: ce se simulează și ce nu. */

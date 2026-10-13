@@ -30,6 +30,18 @@ describe('SingleChoiceGrader', function () {
         expect((new SingleChoiceGrader)->grade($i, ['choice' => 'c'])->isCorrect)->toBeFalse();
     });
 
+    it('acceptă oricare dintre variantele admise de barem', function () {
+        // ANCE 2024: „mărire" → baremul acceptă faimă, cinste, elogiu, laudă, rang.
+        $i = item(ItemType::Mcq, [], ['correct' => ['c', 'd'], 'any' => true]);
+        $g = new SingleChoiceGrader;
+
+        expect($g->grade($i, ['choice' => 'c'])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['choice' => 'd'])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['choice' => 'a'])->isCorrect)->toBeFalse()
+            // Două bife nu sunt „o variantă din listă".
+            ->and($g->grade($i, ['choices' => ['c', 'd']])->isCorrect)->toBeFalse();
+    });
+
     it('penalizează bifele greșite la alegere multiplă', function () {
         $i = item(ItemType::Mcq, [], ['correct' => ['a', 'b'], 'multiple' => true]);
         // „bifez tot" nu trebuie să fie o strategie câștigătoare

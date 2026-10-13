@@ -136,6 +136,7 @@ pentru că ar vedea cheile de corectare.
 | Conținut: informatică | 16 competențe, 17 muchii, 19 itemi, cod C++/Pascal |
 | Conținut: limba engleză | 11 competențe, 11 muchii, 20 itemi, nivel B1 |
 | Conținut: istorie | 12 competențe, 12 muchii, 19 itemi, itemi pe surse |
+| Conținut: limba și literatura română | 8 competențe, 48 de itemi, toți din testele și baremele ANCE 2021–2026 |
 | Poartă automată de calitate pe itemi | ✅ 8 verificări structurale |
 | Suprafață publică SEO (Blade, zero JS) | ✅ 48 URL-uri în sitemap |
 | Alegerea disciplinelor, decuplată de profil | ✅ toate 10 selectabile |
@@ -186,6 +187,8 @@ UTC+2/+3, deci un elev care răspunde la 01:00 local și-ar pierde streak-ul.
 - [ANCE — programa de examen la Informatică (2021)](https://ance.gov.md/sites/default/files/programa_bac_informatica_romana.pdf) — baza arborelui de competențe pentru informatică
 - [ANCE — programa de examen la Limba străină (2021)](https://ance.gov.md/sites/default/files/programa_bac_limba_straina_4.pdf) — nivel B1, 3 subiecte, 30+40+30 puncte; programă unificată pentru toate limbile străine
 - [ANCE — programa de examen la Istoria românilor și universală (2021)](https://ance.gov.md/sites/default/files/programa_bac_istoria_romanilor_si_universala_romana.pdf) — 4 subiecte, 24+22+19+35 puncte; obligatorie la profil umanist
+- [ANCE — programa de examen la Limba și literatura română (2021)](https://ance.gov.md/sites/default/files/programa_bac_limba_si_literatura_romana.pdf) — competențele specifice 3, 4, 5
+- [ANCE — testele și baremele de română](https://ance.gov.md/content/limba-de-instruire-sesiunea-de-baz%C4%83-bac-2025) — fișierele `12_llro_{test,barem}_{r,u}_{sb,ss}{21..26}.pdf`; proba e integral cu răspuns deschis
 - [ANCE — informații pentru candidați](https://ance.gov.md/content/informa%C8%9Bii-utile-pentru-candida%C8%9Bii-la-examenul-na%C8%9Bional-de-bacalaureat)
 - [MEC — ajustări la probele de BAC](https://mec.gov.md/ro/content/mec-si-ance-anunta-ajustari-la-unele-probe-din-cadrul-examenului-de-bacalaureat-incepand-cu)
 

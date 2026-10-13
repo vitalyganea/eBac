@@ -305,3 +305,31 @@ it('matricele și sistemele din LaTeX au trecerile la rând scrise corect', func
 
     expect($probleme)->toBeEmpty(implode("\n", $probleme));
 });
+
+/**
+ * §11b: fiecare item se sprijină pe un document oficial, cu trimitere exactă.
+ *
+ * Deocamdată doar disciplinele refăcute pe surse oficiale. Pe măsură ce
+ * celelalte sunt auditate, se adaugă aici — lista crește, nu scade.
+ */
+it('itemii disciplinelor auditate trimit la un document oficial ANCE', function () {
+    $auditate = ['limba-romana'];
+    $probleme = [];
+
+    $itemi = Item::servable()
+        ->whereHas('subject', fn ($q) => $q->whereIn('slug', $auditate))
+        ->get();
+
+    expect($itemi)->not->toBeEmpty();
+
+    foreach ($itemi as $item) {
+        if (! str_starts_with((string) $item->source, 'ance:')) {
+            $probleme[] = "{$item->source_ref}: sursa „{$item->source}” nu e un document ANCE";
+        }
+        if (! preg_match('~^https://ance\.gov\.md/sites/default/files/[\w.-]+\.pdf#\S+$~', (string) $item->source_ref)) {
+            $probleme[] = "{$item->source_ref}: source_ref nu duce la un PDF ANCE și la un item anume";
+        }
+    }
+
+    expect($probleme)->toBeEmpty(implode("\n", $probleme));
+});

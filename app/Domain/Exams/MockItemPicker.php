@@ -43,6 +43,10 @@ final class MockItemPicker
     /** @throws MockUnavailable */
     private function attempt(User $user, int $subjectId, MockPlan $plan, bool $preferFresh): array
     {
+        if ($plan->isFullyManual()) {
+            throw new MockUnavailable('Proba se corectează integral pe barem, cu răspuns deschis, deci nu se poate simula automat. Exersează competențele ei din Teste.');
+        }
+
         if (! $plan->isSimulable()) {
             // Fie toate subiectele cer corectare umană, fie structura nu are încă
             // tipuri de întrebări asociate (o disciplină fără conținut).

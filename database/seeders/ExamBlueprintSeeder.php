@@ -171,7 +171,19 @@ class ExamBlueprintSeeder extends Seeder
         }
 
         if ($romana) {
-            // Profil real: 10 itemi din sesiunea 2026 (de la 12).
+            // Structura din testele ANCE, sesiunea de bază 2026:
+            //   https://ance.gov.md/sites/default/files/12_llro_test_r_sb26.pdf (+ baremul _barem_r_)
+            //   https://ance.gov.md/sites/default/files/12_llro_test_u_sb26.pdf (+ baremul _barem_u_)
+            // Un singur text literar, apoi itemi cu răspuns DESCHIS — inclusiv
+            // sinonimele, care se cer argumentate. Fiecare item se corectează pe
+            // barem, iar „Redactarea" (20 p) se acordă pe toate secvențele scrise.
+            // Nimic nu e auto-corectabil, deci proba nu se simulează: Testele
+            // antrenează competențele, iar autoevaluarea pe barem vine separat (§13).
+            $open = fn (string $name, int $items, int $points, string $note) => [
+                'name' => $name, 'items' => $items, 'points' => $points,
+                'types' => [], 'auto_gradable' => false, 'note' => $note,
+            ];
+
             ExamBlueprint::updateOrCreate([
                 'subject_id' => $romana->id,
                 'session' => '2026-baza',
@@ -181,15 +193,17 @@ class ExamBlueprintSeeder extends Seeder
                 'total_points' => 100,
                 'duration_minutes' => 180,
                 'structure' => [
-                    ['name' => 'Text nonliterar', 'items' => 4, 'points' => 30],
-                    ['name' => 'Text literar', 'items' => 4, 'points' => 30],
-                    ['name' => 'Eseu structurat', 'items' => 2, 'points' => 40],
+                    $open('Vocabular (itemii 1–2)', 2, 9, 'Sinonime contextuale, sensurile unui cuvânt.'),
+                    $open('Lectura și interpretarea textului (itemii 3–8)', 6, 38,
+                        'Stil funcțional, figuri de stil, motiv literar, titlu, portret moral, apartenența la gen.'),
+                    $open('Scriere funcțională (itemul 9)', 1, 9, 'Anunț pe baza unei legende.'),
+                    $open('Eseu argumentativ (itemul 10)', 1, 24, '1–1,5 pagini, cu referire la două texte literare.'),
+                    $open('Redactare', 0, 20, 'Organizare, analiză, stil, ortografie și punctuație, pe toate secvențele scrise.'),
                 ],
-                'source_url' => 'https://ance.gov.md/clasa-sesiunea-examen/sesiunea-2026-0',
+                'source_url' => 'https://ance.gov.md/sites/default/files/12_llro_barem_r_sb26.pdf',
                 'is_active' => true,
             ]);
 
-            // Umanist/arte/sport: 12 itemi din sesiunea 2026 (de la 15).
             foreach ([ExamProfile::Umanist, ExamProfile::Arte, ExamProfile::Sport] as $profile) {
                 ExamBlueprint::updateOrCreate([
                     'subject_id' => $romana->id,
@@ -200,11 +214,15 @@ class ExamBlueprintSeeder extends Seeder
                     'total_points' => 100,
                     'duration_minutes' => 180,
                     'structure' => [
-                        ['name' => 'Text nonliterar', 'items' => 5, 'points' => 30],
-                        ['name' => 'Text literar', 'items' => 5, 'points' => 30],
-                        ['name' => 'Eseu structurat', 'items' => 2, 'points' => 40],
+                        $open('Vocabular (itemii 1–2)', 2, 7, 'Sinonim contextual argumentat, expresii.'),
+                        $open('Lectura și interpretarea textului (itemii 3–8)', 6, 34,
+                            'Portret moral, figuri de stil, atitudinea personajului, motiv literar, apartenența la gen.'),
+                        $open('Opinie și referință literară (itemii 9–10)', 2, 8, 'Punct de vedere, personaj din literatura română.'),
+                        $open('Scriere funcțională (itemul 11)', 1, 7, 'Invitație sau anunț pe baza unei legende.'),
+                        $open('Eseu structurat (itemul 12)', 1, 24, '1–1,5 pagini, cu referire la două texte literare.'),
+                        $open('Redactare', 0, 20, 'Organizare, analiză, stil, ortografie și punctuație, pe toate secvențele scrise.'),
                     ],
-                    'source_url' => 'https://ance.gov.md/clasa-sesiunea-examen/sesiunea-2026-0',
+                    'source_url' => 'https://ance.gov.md/sites/default/files/12_llro_barem_u_sb26.pdf',
                     'is_active' => true,
                 ]);
             }

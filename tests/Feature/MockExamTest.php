@@ -83,15 +83,17 @@ it('pornește o simulare completă la fiecare disciplină cu conținut', functio
     }
 })->with(['matematica', 'informatica', 'limba-engleza', 'istoria']);
 
-it('refuză cinstit simularea unei discipline fără itemi rezervați', function () {
+it('refuză cinstit simularea unei probe integral cu răspuns deschis', function () {
+    // Limba română: fiecare item ANCE se corectează pe barem, deci simularea
+    // n-ar avea ce nota — chiar dacă banca are itemi de antrenament.
     expect(fn () => app(StartMock::class)($this->user, ($this->subject)('limba-romana')->id))
-        ->toThrow(MockUnavailable::class);
+        ->toThrow(MockUnavailable::class, 'integral pe barem');
 
     $this->actingAs($this->user)
         ->get(route('subject.show', 'limba-romana'))
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->where('sections.mock.available', false)
-            ->whereType('sections.mock.reason', 'string'));
+            ->where('sections.mock.reason', fn (string $r) => str_contains($r, 'integral pe barem')));
 });
 
 it('profilul alege structura, dar nu blochează accesul (§2a)', function () {

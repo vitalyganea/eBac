@@ -11,7 +11,11 @@ use App\Models\Item;
  * mcq, next_step, find_error, code_output, label_diagram.
  *
  * payload: {stem, choices: [{key, text, latex?}], shuffle?: bool}
- * answer:  {correct: ["b"], multiple?: bool}
+ * answer:  {correct: ["b"], multiple?: bool, any?: bool}
+ *
+ * `any`: elevul alege O variantă, iar oricare din `correct` e corectă. Așa arată
+ * itemii ANCE „Rescrie, din lista propusă, un sinonim contextual adecvat":
+ * baremul acceptă mai multe cuvinte din aceeași listă.
  */
 final class SingleChoiceGrader implements Grader
 {
@@ -26,6 +30,12 @@ final class SingleChoiceGrader implements Grader
 
         if ($correct === []) {
             return GradeResult::wrong(['error' => 'item_without_key']);
+        }
+
+        if ($key['any'] ?? false) {
+            return count($chosen) === 1 && in_array($chosen[0], $correct, true)
+                ? GradeResult::correct()
+                : GradeResult::wrong(['expected' => $correct]);
         }
 
         // Cu variante multiple acordăm punctaj parțial, dar penalizăm bifele greșite,

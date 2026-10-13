@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             EnglezaLessonSeeder::class,
             IstorieContentSeeder::class,
             IstorieLessonSeeder::class,
+            RomanaContentSeeder::class,
         ]);
     }
 }

@@ -449,6 +449,27 @@ E poarta care face banca de itemi scalabilă: la mii de itemi, recitirea manual�
 nu mai depistează un item cu cheia greșită. Nu ocoli testul — dacă un item nou
 îl încalcă, itemul e greșit, nu testul.
 
+## 11b. Fiecare item se sprijină pe o resursă oficială
+
+Regulă cerută explicit de autorul proiectului. Sursele acceptate: programa de
+examen ANCE, testele și baremele ANCE din sesiunile anterioare și testele model,
+curriculumul MEC și manualele aprobate de MEC. Nu inventa fapte, date, citate
+sau formulări de cerință care nu se regăsesc într-o sursă oficială.
+
+`items.source` numește documentul oficial, iar `items.source_ref` duce la locul
+exact (link + pagină/subiect). O valoare generică de tipul `seed` nu e o sursă.
+
+Convenția: `source` = `ance:<fișier>` (ex. `ance:12_llro_barem_r_sb26`),
+`source_ref` = URL-ul PDF-ului ANCE + `#item<N>`. Cheia de corectare e ce
+acceptă baremul, nu o variantă aleasă de noi. Textele literare se citează doar
+pe scurt (o propoziție), cu autorul și opera.
+
+`ContentIntegrityTest` verifică regula pe disciplinele auditate (lista
+`$auditate`), care crește pe măsură ce se face auditul. Starea la 2026-10-13:
+limba română e construită integral din teste ANCE; cei 325 de itemi de la
+matematică, informatică, engleză și istorie sunt scriși original, aliniați la
+programă, fără trimitere la un document anume, și încă trebuie auditați.
+
 ## 12. Informatica: codul se dă în ambele limbaje
 
 Examenul din Moldova acceptă **Pascal sau C/C++, la alegerea candidatului**, iar
