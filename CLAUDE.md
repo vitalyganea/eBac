@@ -174,6 +174,13 @@ Publicul e pe Android ieftin cu date mobile limitate. KaTeX (258 KB) se încarc�
 la cerere în `MathText.vue`, nu în bundle-ul paginii. Nu importa biblioteci grele
 sincron în pagini.
 
+Intrarea e aproape în întregime Vue + Inertia; a trecut sub prag doar după ce am
+oprit suportul pentru Options API (`__VUE_OPTIONS_API__: false` în
+`vite.config.ts`). Scrie componente doar cu `<script setup>`: `data()`,
+`methods:` sau mixin-urile nu mai funcționează. `npm run bundle-size` verifică
+pragul și absența KaTeX din importurile statice ale paginilor; CI-ul pică la
+depășire.
+
 ## 10b. Clasamentele sunt PE DISCIPLINĂ
 
 „La matematică sunt al 34-lea din 938" e informația care contează pentru elev.
@@ -381,7 +388,7 @@ nu se pot colora în tema aplicației.
 Nu am adăugat o bibliotecă de iconițe. `resources/icons/icons.json` e un set de
 ~36 de forme extrase din Lucide (ISC) cu `node bin/icons.mjs`; `lucide-static`
 rămâne devDependency și nimic din el nu ajunge la client. Tot setul costă ~2,5 KB
-comprimat, într-un chunk partajat — intrarea de 201 KB a rămas neatinsă (§10).
+comprimat, într-un chunk partajat — intrarea a rămas neatinsă (§10).
 
 **Un singur fișier, doi consumatori:** `Icon.vue` pentru aplicație și
 `<x-ebac-icon>` (`App\Support\Icons`) pentru paginile publice, care n-au niciun

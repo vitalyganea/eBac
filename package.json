@@ -5,7 +5,9 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "icons": "node bin/icons.mjs"
+        "icons": "node bin/icons.mjs",
+        "typecheck": "vue-tsc --noEmit",
+        "bundle-size": "node bin/bundle-size.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
@@ -18,7 +20,7 @@
         "typescript": "^5.9.3",
         "vite": "^8.0.0",
         "vite-plugin-pwa": "^1.3.0",
-        "vue-tsc": "^3.3.11"
+        "vue-tsc": "^3.3.13"
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.1"

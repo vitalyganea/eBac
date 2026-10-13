@@ -1,0 +1,91 @@
+# Rulează la fiecare push și PR porțile care țin invariantele din CLAUDE.md:
+# ContentIntegrityTest, SeoTest, HintsTest și celelalte (toate în `php artisan
+# test`), stilul (Pint), tipurile din Vue (vue-tsc) și bugetul de bundle (§10).
+#
+# Porturile sunt cele din .env.example (5433 / 6380), ca .env-ul copiat să
+# funcționeze fără modificări — la fel ca local, cu compose.yml.
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    frontend:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+                  cache: npm
+
+            - run: npm ci
+            - run: npm run typecheck
+            - run: npm run build
+            - run: npm run bundle-size
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: build
+                  path: public/build
+                  retention-days: 1
+
+    backend:
+        runs-on: ubuntu-latest
+        needs: frontend
+
+        services:
+            postgres:
+                image: postgres:18-alpine
+                env:
+                    POSTGRES_DB: ebac_test
+                    POSTGRES_USER: ebac
+                    POSTGRES_PASSWORD: secret
+                ports: ['5433:5432']
+                options: >-
+                    --health-cmd "pg_isready -U ebac -d ebac_test"
+                    --health-interval 5s --health-timeout 5s --health-retries 10
+            valkey:
+                image: valkey/valkey:8-alpine
+                ports: ['6380:6379']
+                options: >-
+                    --health-cmd "valkey-cli ping"
+                    --health-interval 5s --health-timeout 5s --health-retries 10
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.3'
+                  extensions: pdo_pgsql, pgsql, redis, gd, intl, bcmath, exif
+                  coverage: none
+
+            - uses: actions/cache@v4
+              with:
+                  path: ~/.composer/cache
+                  key: composer-${{ hashFiles('composer.lock') }}
+
+            - run: composer install --no-interaction --no-progress --prefer-dist
+
+            # Testele care randează pagini Inertia au nevoie de manifestul Vite.
+            - uses: actions/download-artifact@v4
+              with:
+                  name: build
+                  path: public/build
+
+            - name: Pregătește .env
+              run: |
+                  cp .env.example .env
+                  sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=secret/' .env
+                  php artisan key:generate
+
+            - run: vendor/bin/pint --test
+            - run: php artisan test

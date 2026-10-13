@@ -74,9 +74,9 @@ shell-ului; dacă e cel de sistem (v18), Vite cade cu
 `SyntaxError: Invalid regular expression flags` — flagul de regex `/v` folosit de
 `string-width` există doar din Node 20.
 
-`composer dev` și `composer build` rulează întâi `bin/preflight.cjs`, care
-verifică versiunea și afișează instrucțiunile în loc de un stack trace din
-`node_modules`. Fișierul `.nvmrc` fixează versiunea; `nvm use` o aplică.
+`composer dev` și `composer build` trec prin `bin/with-node.sh`, care caută
+un Node potrivit în nvm și, dacă nu-l găsește, afișează instrucțiunile în loc de
+un stack trace din `node_modules`. Fișierul `.nvmrc` fixează versiunea; `nvm use` o aplică.
 
 Dacă `nvm` nu e găsit deloc, terminalul a fost deschis înainte de instalarea
 nvm — `source ~/.bashrc`.
@@ -93,7 +93,12 @@ scrii cod. `AppServiceProvider::configureDevServer()` readuce `artisan serve`
 ```sh
 sg docker -c 'docker exec ebac-postgres psql -U ebac -d ebac -c "CREATE DATABASE ebac_test OWNER ebac;"'
 vendor/bin/pest
+vendor/bin/pint --test
+npm run typecheck
+npm run build && npm run bundle-size
 ```
+
+CI-ul (`.github/workflows/ci.yml`) rulează exact aceiași pași la fiecare push.
 
 Testele rulează pe **Postgres**, nu pe SQLite in-memory: migrațiile folosesc
 `jsonb`, indici GIN și secvențe, iar diagnosticul e un CTE recursiv. Un SQLite

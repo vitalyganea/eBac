@@ -5,7 +5,7 @@
 // De ce un generator și nu o dependență în bundle: o bibliotecă de iconițe
 // aduce un runtime (o funcție de creare de componente, un index cu toate cele
 // 2000+ de forme) pentru ceva ce este, la bază, un șir de caractere cu un
-// `path`. Bundle-ul paginii e deja la 201 KB brut, iar plafonul declarat e 200.
+// `path`. Intrarea e aproape de plafonul de 200 KB (vezi bin/bundle-size.mjs).
 //
 // De ce nu path-uri scrise de mână: un `d` greșit nu dă eroare — desenează o
 // mâzgălitură. Aici formele vin din sursa oficială și se pot regenera la un
