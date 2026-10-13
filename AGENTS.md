@@ -149,6 +149,31 @@ sesiune și profil. Nu hardcoda structura probelor.
 `Item::practicePool()` vs `Item::examPool()`. Simulările folosesc itemi rezervați,
 altfel estimarea de notă nu mai măsoară nimic după două luni.
 
+## 8b. Simularea BAC
+
+`App\Domain\Exams`. Pornește din `MockExamController`, NU din `practice.start`:
+itemii vin din structura examenului (`exam_blueprints`), nu din selecția
+adaptivă — o simulare măsoară, nu antrenează, deci nu se calibrează pe nivelul
+elevului (un elev slab ar primi un test ușor și o estimare umflată).
+
+- **Secțiunile** se mapează pe bancă prin `structure[].types` și
+  `structure[].mock_items`. Punctele secțiunii se împart egal între itemii ei,
+  deci ponderea din examen se păstrează. Secțiunile fără `types` sau cu
+  `auto_gradable: false` nu se simulează și se declară în rezultat
+  („acoperă 30 din 100 de puncte") — nu se ghicesc (§13).
+- **Termenul** e `practice_sessions.expires_at`, fixat la pornire. `SubmitAnswer`
+  refuză (`MockClosed`) după termen, după predare și al doilea răspuns la
+  aceeași întrebare. Timerul din browser e decor (§5).
+- **Fără feedback pe parcurs.** Cheia și explicația pleacă spre client abia în
+  `MockReport`, după predare, doar celui care a dat simularea.
+- **Itemii văzuți** într-o simulare nu mai măsoară nimic pentru acel elev:
+  `MockItemPicker` îi preferă pe cei nevăzuți și declară reutilizarea
+  (`config.reused`). Tipurile cerute și de secțiunile următoare se aleg ultimele,
+  altfel o secțiune timpurie le poate consuma. Selecția nu depinde de ordinea
+  rândurilor din bază — un bug s-a ascuns în teste exact așa.
+- **Profilul** alege structura, dar nu blochează (§2a): fără structură pentru
+  profilul elevului, primește cea disponibilă.
+
 ## 9. Elevii sunt minori
 
 În clasamente și dueluri apare **doar** `users.username`, niciodată numele real
@@ -173,6 +198,13 @@ beneficiu.
 Publicul e pe Android ieftin cu date mobile limitate. KaTeX (258 KB) se încarcă
 la cerere în `MathText.vue`, nu în bundle-ul paginii. Nu importa biblioteci grele
 sincron în pagini.
+
+Intrarea e aproape în întregime Vue + Inertia; a trecut sub prag doar după ce am
+oprit suportul pentru Options API (`__VUE_OPTIONS_API__: false` în
+`vite.config.ts`). Scrie componente doar cu `<script setup>`: `data()`,
+`methods:` sau mixin-urile nu mai funcționează. `npm run bundle-size` verifică
+pragul și absența KaTeX din importurile statice ale paginilor; CI-ul pică la
+depășire.
 
 ## 10b. Clasamentele sunt PE DISCIPLINĂ
 
@@ -370,6 +402,41 @@ răspunde corect din intuiție și totuși să nu înțeleagă.
 Cheia de unicitate e `(user_id, skill_id, block_id)` cu `NULLS NOT DISTINCT` —
 fără `skill_id`, două teme marcate fără bloc s-ar suprascrie reciproc, pentru că
 `where block_id is null` găsește primul rând.
+
+## 10i. Iconițele se desenează, emoji-ul rămâne doar la avatar
+
+Interfața folosea emoji ca pictograme. Nu mai o face, din trei motive concrete:
+steagurile (🇷🇴, 🇬🇧) apar pe Windows ca două litere, nu ca steag; desenul și
+lățimea celorlalte variază de la un Android la altul — exact publicul nostru; și
+nu se pot colora în tema aplicației.
+
+Nu am adăugat o bibliotecă de iconițe. `resources/icons/icons.json` e un set de
+~36 de forme extrase din Lucide (ISC) cu `node bin/icons.mjs`; `lucide-static`
+rămâne devDependency și nimic din el nu ajunge la client. Tot setul costă ~2,5 KB
+comprimat, într-un chunk partajat — intrarea a rămas neatinsă (§10).
+
+**Un singur fișier, doi consumatori:** `Icon.vue` pentru aplicație și
+`<x-ebac-icon>` (`App\Support\Icons`) pentru paginile publice, care n-au niciun
+JavaScript (§14). O soluție doar-Vue ar fi lăsat Blade-ul descoperit și, în
+practică, ar fi produs un al doilea set care ajunge să difere.
+
+Componentul se numește `ebac-icon`, nu `icon`: `<x-icon>` e deja înregistrat de
+blade-ui-kit/blade-icons, o dependență a Filament, și componentul lui de clasă
+câștigă în fața celui anonim.
+
+`subjects.icon` și `achievements.icon` stochează NUME de iconițe, nu emoji.
+Citește-le prin `iconName()`: un nume necunoscut randează nimic — o casetă goală
+care arată a defecțiune — iar metoda întoarce iconița implicită.
+
+Iconița are 1em și `vertical-align: -0.125em`, deci crește cu textul din jur ca
+emoji-ul pe care îl înlocuiește. În proză o lași inline (`class="mr-1"`); `flex`
+pe un paragraf rupe încadrarea textului, fiindcă fiecare nod devine element de
+flex.
+
+`IconTest` verifică fiecare nume folosit, fiecare iconiță din baza de date și
+faptul că emoji-urile nu se strecoară înapoi. **Avatarurile sunt exceptate
+deliberat** — lista fixă de 12 emoji rămâne opțiunea implicită pentru că nu
+ocupă spațiu, nu cere moderare și e instant (§10f, §10g).
 
 ## 11. Conținutul se validează automat, nu prin recitire
 

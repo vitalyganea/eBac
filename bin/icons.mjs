@@ -54,6 +54,8 @@ const ICONS = [
     'undo-2',
     'settings',             // setările contului, în antet
     'log-out',              // deconectare, în antet
+    'clipboard-check',      // simularea BAC
+    'timer',                // timpul rămas în simulare
 
     // Disciplinele (`subjects.icon`)
     'radical',              // matematică

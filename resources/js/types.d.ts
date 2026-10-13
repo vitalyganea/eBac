@@ -69,6 +69,13 @@ export type AnswerValue =
 
 export type StudentAnswer = { [key: string]: AnswerValue };
 
+/**
+ * Ce citesc componentele de item din feedback: dacă e corect și cheia, în
+ * jetoanele cu care au fost afișate variantele. Pagina de rezultat a
+ * simulării le refolosește fără XP sau rating, care acolo nu există.
+ */
+export type ItemFeedback = Pick<Feedback, 'is_correct' | 'score' | 'breakdown' | 'correct_answer'>;
+
 export interface Feedback {
     is_correct: boolean;
     score: number;

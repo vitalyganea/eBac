@@ -58,6 +58,16 @@ class IstorieContentSeeder extends Seeder
         lichidată."
         TXT;
 
+    /** Sursă pentru simulare (holdout). Text neatribuit, scris pentru platformă. */
+    private const SURSA_TITULESCU = <<<'TXT'
+        „În anul 1920, România s-a numărat printre membrii fondatori ai Societății (Ligii)
+        Națiunilor. Diplomatul Nicolae Titulescu a reprezentat țara la Geneva timp de mai mulți
+        ani și a fost ales de două ori președinte al Adunării Societății Națiunilor, în 1930 și
+        în 1931. Fără îndoială, Titulescu a fost cel mai strălucit diplomat pe care l-a avut
+        vreodată Europa de Est. În discursurile sale, el a susținut principiul securității
+        colective și respectarea tratatelor de pace încheiate după Primul Război Mondial."
+        TXT;
+
     public function run(): void
     {
         $subject = Subject::where('slug', 'istoria')->firstOrFail();
@@ -698,6 +708,170 @@ class IstorieContentSeeder extends Seeder
                     'Cele două blocuri s-au instituționalizat prin alianțe militare rivale — NATO și, ulterior, Tratatul de la Varșovia.',
                 ],
                 'explanation' => 'Lumea bipolară desemnează structurarea relațiilor internaționale în jurul SUA și URSS, cu blocuri militare rivale. Varianta cu confruntarea directă e falsă — tocmai absența ei definește Războiul Rece. Liga Națiunilor își încetase activitatea în 1946.',
+            ],
+            [
+                'ref' => 'seed:ist:mock:razboiul-rece-termeni',
+                'skill' => 'terminologie',
+                'type' => ItemType::Match,
+                'difficulty' => 3,
+                'points' => 4,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Potrivește fiecare termen cu semnificația lui în perioada Războiului Rece.',
+                    'left' => [
+                        ['key' => 'l1', 'text' => 'Planul Marshall'],
+                        ['key' => 'l2', 'text' => 'Cortina de fier'],
+                        ['key' => 'l3', 'text' => 'Perestroika'],
+                        ['key' => 'l4', 'text' => 'Glasnost'],
+                    ],
+                    'right' => [
+                        ['key' => 'r1', 'text' => 'Politica de transparență și de relaxare a cenzurii din URSS, din a doua jumătate a anilor \'80'],
+                        ['key' => 'r2', 'text' => 'Program american de ajutor economic pentru refacerea Europei după 1945'],
+                        ['key' => 'r3', 'text' => 'Programul de restructurare economică și politică a URSS, inițiat de Mihail Gorbaciov'],
+                        ['key' => 'r4', 'text' => 'Linia de separare dintre Europa occidentală și statele aflate sub control sovietic'],
+                    ],
+                ],
+                'answer' => ['pairs' => ['l1' => 'r2', 'l2' => 'r4', 'l3' => 'r3', 'l4' => 'r1']],
+                'hints' => [
+                    'Doi termeni țin de începutul Războiului Rece, doi de sfârșitul lui.',
+                    'Planul Marshall și „cortina de fier" apar imediat după 1945. Glasnost și perestroika sunt termeni rusești din anii \'80.',
+                    '„Perestroika" înseamnă „restructurare", iar „glasnost" înseamnă „transparență".',
+                ],
+                'explanation' => 'Planul Marshall (1948) a finanțat refacerea Europei occidentale. „Cortina de fier" desemna linia de separare față de blocul sovietic. Perestroika (restructurarea) și glasnost (transparența) au fost politicile lui Mihail Gorbaciov din a doua jumătate a anilor \'80.',
+            ],
+            [
+                'ref' => 'seed:ist:mock:vaslui',
+                'skill' => 'ev-mediu',
+                'type' => ItemType::FillBlanks,
+                'difficulty' => 2,
+                'points' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Completează afirmația.',
+                    'stem_template' => 'În anul ___, la Vaslui, Ștefan cel Mare a învins armata otomană.',
+                    'blanks' => [
+                        ['key' => 'an', 'options' => ['1475', '1457', '1504', '1600']],
+                    ],
+                ],
+                'answer' => ['values' => ['an' => ['1475']]],
+                'hints' => [
+                    'Ștefan cel Mare a domnit între 1457 și 1504. Două dintre variante sunt chiar începutul și sfârșitul domniei.',
+                    'Bătălia a avut loc la aproape două decenii după urcarea pe tron.',
+                    'Victoria de la Vaslui (Podul Înalt) datează din ianuarie 1475. Anul 1600 aparține lui Mihai Viteazul.',
+                ],
+                'explanation' => 'Bătălia de la Vaslui (Podul Înalt), din ianuarie 1475, e cea mai cunoscută victorie a lui Ștefan cel Mare împotriva otomanilor. 1457 și 1504 sunt începutul și sfârșitul domniei sale, iar 1600 e anul unirii realizate de Mihai Viteazul.',
+            ],
+            [
+                'ref' => 'seed:ist:mock:cronologie-medievala',
+                'skill' => 'cronologie',
+                'type' => ItemType::Timeline,
+                'difficulty' => 3,
+                'points' => 4,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Așază evenimentele în ordine cronologică, de la cel mai vechi la cel mai recent.',
+                    'steps' => [
+                        ['key' => 'e1', 'text' => 'Întemeierea statului medieval independent Moldova, sub Bogdan I'],
+                        ['key' => 'e2', 'text' => 'Începutul domniei lui Ștefan cel Mare'],
+                        ['key' => 'e3', 'text' => 'Bătălia din Codrii Cosminului'],
+                        ['key' => 'e4', 'text' => 'Unirea Țării Românești, Transilvaniei și Moldovei sub Mihai Viteazul'],
+                        ['key' => 'e5', 'text' => 'Bătălia de la Stănilești, purtată de Dimitrie Cantemir și Petru I împotriva otomanilor'],
+                    ],
+                ],
+                'answer' => ['order' => ['e1', 'e2', 'e3', 'e4', 'e5']],
+                'hints' => [
+                    'Trei evenimente sunt din secolele XIV–XV, unul de la 1600, iar unul din secolul al XVIII-lea.',
+                    'Bătălia din Codrii Cosminului (1497) are loc spre sfârșitul domniei lui Ștefan cel Mare, care începuse în 1457.',
+                    'Ordinea: 1359, 1457, 1497, 1600, 1711.',
+                ],
+                'explanation' => 'Reperele: 1359 — Moldova devine stat independent sub Bogdan I; 1457 — începe domnia lui Ștefan cel Mare; 1497 — victoria din Codrii Cosminului împotriva polonezilor; 1600 — unirea sub Mihai Viteazul; 1711 — campania de la Stănilești a lui Dimitrie Cantemir, alături de Petru I.',
+            ],
+            [
+                'ref' => 'seed:ist:mock:cronologie-rm',
+                'skill' => 'contemporan',
+                'type' => ItemType::Timeline,
+                'difficulty' => 3,
+                'points' => 4,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Așază în ordine cronologică etapele afirmării Republicii Moldova ca stat.',
+                    'steps' => [
+                        ['key' => 'e1', 'text' => 'Adoptarea legislației privind funcționarea limbilor și revenirea la grafia latină'],
+                        ['key' => 'e2', 'text' => 'Adoptarea Declarației de Suveranitate'],
+                        ['key' => 'e3', 'text' => 'Proclamarea independenței Republicii Moldova'],
+                        ['key' => 'e4', 'text' => 'Admiterea Republicii Moldova în Organizația Națiunilor Unite'],
+                        ['key' => 'e5', 'text' => 'Admiterea Republicii Moldova în Consiliul Europei'],
+                    ],
+                ],
+                'answer' => ['order' => ['e1', 'e2', 'e3', 'e4', 'e5']],
+                'hints' => [
+                    'Suveranitatea precede independența: un stat se declară întâi suveran în cadrul URSS, apoi se desprinde de ea.',
+                    'Admiterea în organizațiile internaționale vine după proclamarea independenței — doar un stat independent poate deveni membru.',
+                    'Ordinea: august 1989, iunie 1990, august 1991, martie 1992, iulie 1995.',
+                ],
+                'explanation' => 'Reperele: 31 august 1989 — legislația lingvistică și revenirea la grafia latină; 23 iunie 1990 — Declarația de Suveranitate; 27 august 1991 — Declarația de Independență; 2 martie 1992 — admiterea în ONU; 13 iulie 1995 — admiterea în Consiliul Europei.',
+            ],
+            [
+                'ref' => 'seed:ist:mock:titulescu-opinie',
+                'skill' => 'analiza-surselor',
+                'type' => ItemType::Mcq,
+                'difficulty' => 3,
+                'points' => 2,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Care dintre afirmațiile din sursă exprimă o OPINIE, nu un fapt?',
+                    'passage_title' => 'Sursa',
+                    'passage' => self::SURSA_TITULESCU,
+                    'choices' => [
+                        ['key' => 'a', 'text' => 'Titulescu a fost cel mai strălucit diplomat pe care l-a avut vreodată Europa de Est.'],
+                        ['key' => 'b', 'text' => 'România s-a numărat printre membrii fondatori ai Societății Națiunilor.'],
+                        ['key' => 'c', 'text' => 'Titulescu a fost ales de două ori președinte al Adunării Societății Națiunilor.'],
+                        ['key' => 'd', 'text' => 'Titulescu a susținut principiul securității colective.'],
+                    ],
+                ],
+                'answer' => ['correct' => ['a']],
+                'hints' => [
+                    'Un fapt se poate verifica în documente. O opinie e o judecată de valoare a autorului.',
+                    'Caută cuvintele care trădează aprecierea: superlative, „fără îndoială", „cel mai…".',
+                    'Datele despre fondarea Societății Națiunilor, alegerile din 1930–1931 și discursurile lui Titulescu sunt verificabile. „Cel mai strălucit diplomat" nu este.',
+                ],
+                'explanation' => 'Superlativul „cel mai strălucit diplomat" și formula „fără îndoială" exprimă aprecierea autorului, nu un fapt verificabil. Celelalte afirmații pot fi confirmate din documente — exact distincția fapt/opinie cerută de programă.',
+            ],
+            [
+                'ref' => 'seed:ist:mock:cauze-efecte-moderna',
+                'skill' => 'epoca-moderna',
+                'type' => ItemType::Match,
+                'difficulty' => 4,
+                'points' => 4,
+                'holdout' => true,
+                'source' => 'holdout-simulare',
+                'payload' => [
+                    'stem' => 'Potrivește fiecare eveniment (cauza) cu urmarea lui directă.',
+                    'left' => [
+                        ['key' => 'l1', 'text' => 'Războiul ruso-turc din 1806–1812'],
+                        ['key' => 'l2', 'text' => 'Revoluția condusă de Tudor Vladimirescu (1821)'],
+                        ['key' => 'l3', 'text' => 'Dubla alegere a lui Alexandru Ioan Cuza (1859)'],
+                        ['key' => 'l4', 'text' => 'Războiul ruso-româno-turc din 1877–1878'],
+                    ],
+                    'right' => [
+                        ['key' => 'r1', 'text' => 'Unirea Moldovei și a Țării Românești'],
+                        ['key' => 'r2', 'text' => 'Recunoașterea internațională a independenței României la Congresul de la Berlin'],
+                        ['key' => 'r3', 'text' => 'Anexarea teritoriului dintre Prut și Nistru la Imperiul Rus'],
+                        ['key' => 'r4', 'text' => 'Restabilirea domniilor pământene în Moldova și Țara Românească'],
+                    ],
+                ],
+                'answer' => ['pairs' => ['l1' => 'r3', 'l2' => 'r4', 'l3' => 'r1', 'l4' => 'r2']],
+                'hints' => [
+                    'Ordonează mai întâi evenimentele în timp: urmările vin în aceeași ordine.',
+                    'Războiul din 1806–1812 s-a încheiat cu Pacea de la București. Ce teritoriu a pierdut atunci Moldova?',
+                    'După 1821, Poarta a renunțat la domnii fanarioți. Congresul de la Berlin (1878) a urmat războiului din 1877–1878.',
+                ],
+                'explanation' => 'Pacea de la București (1812) a încheiat războiul ruso-turc și a dus la anexarea Basarabiei. Revoluția din 1821 a determinat Poarta să revină la domni pământeni (1822). Dubla alegere a lui Cuza a realizat unirea, iar războiul din 1877–1878 a adus recunoașterea independenței la Berlin.',
             ],
         ];
     }

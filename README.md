@@ -145,7 +145,8 @@ pentru că ar vedea cheile de corectare.
 | Încărcare de avatare (reencodare, EXIF eliminat) | ✅ |
 | Moderare: pre-aprobare nume + avatar, filtru automat, raportare | ✅ |
 | Istoric privat al dificultăților, pe blocuri și teme | ✅ |
-| Teste cap-coadă pe fluxul de antrenament | ✅ 131 teste |
+| Simulare BAC: structura examenului, holdout, termen pe server | ✅ matematică, informatică, engleză, istorie |
+| Teste (Pest) | ✅ 300+, inclusiv toate rutele × toate rolurile |
 
 ## Ce urmează
 
@@ -155,7 +156,6 @@ pentru că ar vedea cheile de corectare.
    10.000 de itemi buni nu sunt.
 3. **Provocarea zilei + streak reminder.**
 4. **PWA + offline** (`vite-plugin-pwa` e deja instalat).
-5. **Simulare BAC** pe `exam_blueprints`, cu itemii de holdout.
 
 ---
 

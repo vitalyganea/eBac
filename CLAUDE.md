@@ -149,6 +149,31 @@ sesiune și profil. Nu hardcoda structura probelor.
 `Item::practicePool()` vs `Item::examPool()`. Simulările folosesc itemi rezervați,
 altfel estimarea de notă nu mai măsoară nimic după două luni.
 
+## 8b. Simularea BAC
+
+`App\Domain\Exams`. Pornește din `MockExamController`, NU din `practice.start`:
+itemii vin din structura examenului (`exam_blueprints`), nu din selecția
+adaptivă — o simulare măsoară, nu antrenează, deci nu se calibrează pe nivelul
+elevului (un elev slab ar primi un test ușor și o estimare umflată).
+
+- **Secțiunile** se mapează pe bancă prin `structure[].types` și
+  `structure[].mock_items`. Punctele secțiunii se împart egal între itemii ei,
+  deci ponderea din examen se păstrează. Secțiunile fără `types` sau cu
+  `auto_gradable: false` nu se simulează și se declară în rezultat
+  („acoperă 30 din 100 de puncte") — nu se ghicesc (§13).
+- **Termenul** e `practice_sessions.expires_at`, fixat la pornire. `SubmitAnswer`
+  refuză (`MockClosed`) după termen, după predare și al doilea răspuns la
+  aceeași întrebare. Timerul din browser e decor (§5).
+- **Fără feedback pe parcurs.** Cheia și explicația pleacă spre client abia în
+  `MockReport`, după predare, doar celui care a dat simularea.
+- **Itemii văzuți** într-o simulare nu mai măsoară nimic pentru acel elev:
+  `MockItemPicker` îi preferă pe cei nevăzuți și declară reutilizarea
+  (`config.reused`). Tipurile cerute și de secțiunile următoare se aleg ultimele,
+  altfel o secțiune timpurie le poate consuma. Selecția nu depinde de ordinea
+  rândurilor din bază — un bug s-a ascuns în teste exact așa.
+- **Profilul** alege structura, dar nu blochează (§2a): fără structură pentru
+  profilul elevului, primește cea disponibilă.
+
 ## 9. Elevii sunt minori
 
 În clasamente și dueluri apare **doar** `users.username`, niciodată numele real

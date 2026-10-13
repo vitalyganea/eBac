@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import GapButton from '@/components/lesson/GapButton.vue';
@@ -26,9 +26,55 @@ const props = defineProps<{
         blocks: { id: string; type: string; label: string }[];
     } | null;
     has_next: boolean;
+    /** Doar în simulare: termenul (al serverului) și secțiunea curentă. */
+    exam: { deadline_at: string | null; server_now: string; section: string | null } | null;
 }>();
 
 const page = usePage();
+
+const isMock = computed(() => props.exam !== null);
+
+// ---- Cronometrul simulării ------------------------------------------------
+// Decor: termenul real e `expires_at` de pe server (§5). Diferența față de ceasul
+// serverului se calculează o dată, ca un telefon cu ora greșită să numere corect.
+const clockOffset = props.exam ? Date.parse(props.exam.server_now) - Date.now() : 0;
+const now = ref(Date.now() + clockOffset);
+let timer: ReturnType<typeof setInterval> | undefined;
+
+const secondsLeft = computed(() => {
+    if (!props.exam?.deadline_at) return null;
+    return Math.max(0, Math.floor((Date.parse(props.exam.deadline_at) - now.value) / 1000));
+});
+
+const timeLeftLabel = computed(() => {
+    const s = secondsLeft.value ?? 0;
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+});
+
+onMounted(() => {
+    if (!isMock.value) return;
+    timer = setInterval(() => {
+        now.value = Date.now() + clockOffset;
+        // La zero, serverul închide lucrarea și arată rezultatul.
+        if (secondsLeft.value === 0) {
+            clearInterval(timer);
+            router.get(route('practice.play', props.session.uuid));
+        }
+    }, 1000);
+});
+
+onBeforeUnmount(() => clearInterval(timer));
+
+// ---- Predarea lucrării ------------------------------------------------------
+const confirmingFinish = ref(false);
+const finishing = ref(false);
+
+function finish() {
+    finishing.value = true;
+    router.post(route('mock.submit', props.session.uuid), {}, {
+        onFinish: () => (finishing.value = false),
+    });
+}
 
 const answer = ref<StudentAnswer | null>(null);
 const submitting = ref(false);
@@ -137,9 +183,20 @@ function next() {
         <div class="space-y-6">
             <!-- Progresul sesiunii -->
             <div class="space-y-2">
-                <div class="flex items-center justify-between text-sm text-slate-400">
-                    <span>{{ session.mode_label }}</span>
-                    <span class="tabular-nums">
+                <div class="flex items-center justify-between gap-3 text-sm text-slate-400">
+                    <span class="min-w-0 truncate">
+                        {{ session.mode_label }}<template v-if="exam?.section"> · {{ exam.section }}</template>
+                    </span>
+                    <span
+                        v-if="isMock && secondsLeft !== null"
+                        class="inline-flex shrink-0 items-center gap-1 font-semibold tabular-nums"
+                        :class="secondsLeft < 60 ? 'text-rose-400' : secondsLeft < 300 ? 'text-amber-400' : 'text-slate-300'"
+                        role="timer"
+                        :aria-label="`Timp rămas ${timeLeftLabel}`"
+                    >
+                        <Icon name="timer" />{{ timeLeftLabel }}
+                    </span>
+                    <span class="shrink-0 tabular-nums">
                         {{ session.progress.answered }} / {{ session.progress.total }}
                     </span>
                 </div>
@@ -278,12 +335,42 @@ function next() {
                 </button>
 
                 <button v-if="!isAnswered" type="button" class="btn-primary flex-1" :disabled="!canSubmit" @click="submit">
-                    {{ submitting ? 'Se trimite…' : 'Verifică' }}
+                    <template v-if="submitting">Se trimite…</template>
+                    <!-- În simulare nu există feedback pe parcurs: răspunsul se
+                         înregistrează, iar corectarea apare la final. -->
+                    <template v-else>{{ isMock ? 'Răspunde' : 'Verifică' }}</template>
                 </button>
 
                 <button v-else type="button" class="btn-primary flex-1" @click="next">
                     {{ has_next ? 'Continuă' : 'Vezi rezultatul' }}
                 </button>
+            </div>
+
+            <!-- Predarea înainte de termen. Confirmare în pagină, nu dialog al
+                 browserului: întrebările rămase valorează zero. -->
+            <div v-if="isMock" class="border-t border-white/10 pt-4 text-center">
+                <button
+                    v-if="!confirmingFinish"
+                    type="button"
+                    class="text-sm text-slate-400 underline-offset-4 hover:text-slate-200 hover:underline"
+                    @click="confirmingFinish = true"
+                >
+                    Predă lucrarea acum
+                </button>
+
+                <div v-else class="space-y-3">
+                    <p class="text-sm text-slate-300">
+                        Mai ai {{ session.progress.total - session.progress.answered }}
+                        {{ session.progress.total - session.progress.answered === 1 ? 'întrebare' : 'întrebări' }}
+                        fără răspuns. Ele valorează 0 puncte.
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <button type="button" class="btn-ghost" @click="confirmingFinish = false">Continui</button>
+                        <button type="button" class="btn-primary" :disabled="finishing" @click="finish">
+                            {{ finishing ? 'Se predă…' : 'Predau' }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </AppLayout>

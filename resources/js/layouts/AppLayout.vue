@@ -158,6 +158,16 @@ function logout() {
         </header>
 
         <main class="mx-auto max-w-3xl px-4 py-6">
+            <!-- Erorile trimise de server prin flash (un indiciu refuzat, o
+                 simulare care nu se poate porni). Înainte nu le afișa nimeni:
+                 butonul părea pur și simplu că nu face nimic. -->
+            <p
+                v-if="page.props.flash?.error"
+                role="alert"
+                class="mb-4 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm"
+            >
+                {{ page.props.flash.error }}
+            </p>
             <slot />
         </main>
 

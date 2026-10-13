@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import CodeBlock from '@/components/CodeBlock.vue';
 import MathText from '@/components/MathText.vue';
-import type { Feedback, StudentAnswer, StudentItem } from '@/types';
+import type { ItemFeedback, StudentAnswer, StudentItem } from '@/types';
 
 /**
  * Alegere dintre variante — acoperă mcq, next_step, find_error, code_output și
@@ -11,7 +11,7 @@ import type { Feedback, StudentAnswer, StudentItem } from '@/types';
 const props = defineProps<{
     item: StudentItem;
     modelValue: StudentAnswer | null;
-    feedback: Feedback | null;
+    feedback: ItemFeedback | null;
     disabled: boolean;
 }>();
 

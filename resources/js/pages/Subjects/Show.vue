@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Head, Link, router, Deferred } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Avatar from '@/components/Avatar.vue';
@@ -30,6 +31,19 @@ const props = defineProps<{
     sections: {
         course: { available: boolean; lessons_count: number };
         tests: { available: boolean; items_count: number };
+        mock: {
+            available: boolean;
+            reason: string | null;
+            plan: {
+                session: string;
+                profile_label: string;
+                items: number;
+                minutes: number;
+                auto_points: number;
+                total_points: number;
+            } | null;
+            history: { uuid: string; score: number; auto_points: number; completed_at: string }[];
+        };
     };
     board: { entries: BoardEntry[]; me: BoardEntry | null; total: number } | null;
 }>();
@@ -39,6 +53,17 @@ const nf = new Intl.NumberFormat('ro-MD');
 function startPractice() {
     router.post(route('practice.start'), { subject: props.subject.slug, mode: 'practice' });
 }
+
+const startingMock = ref(false);
+
+function startMock() {
+    startingMock.value = true;
+    router.post(route('mock.start'), { subject: props.subject.slug }, {
+        onFinish: () => (startingMock.value = false),
+    });
+}
+
+const dateFormat = new Intl.DateTimeFormat('ro-MD', { day: 'numeric', month: 'short' });
 </script>
 
 <template>
@@ -154,6 +179,55 @@ function startPractice() {
                     </p>
                 </button>
             </div>
+
+            <!-- ============ SIMULARE BAC ============ -->
+            <!-- Vizibilă și când nu se poate porni, cu motivul real (§2a). -->
+            <section class="card">
+                <div class="flex items-start gap-4">
+                    <p class="text-2xl text-slate-300"><Icon name="clipboard-check" :stroke-width="1.75" /></p>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-semibold">Simulare BAC</p>
+                        <p class="mt-1 text-sm text-slate-400">
+                            Structura examenului, cu timp limitat și întrebări pe care nu le-ai văzut la antrenament.
+                            Corectarea o vezi la final.
+                        </p>
+
+                        <p v-if="sections.mock.plan?.items" class="mt-3 text-xs text-slate-400 tabular-nums">
+                            {{ sections.mock.plan.items }} întrebări · {{ sections.mock.plan.minutes }} min
+                            · acoperă {{ sections.mock.plan.auto_points }} din {{ sections.mock.plan.total_points }} de puncte
+                            <span class="text-slate-500">(profil {{ sections.mock.plan.profile_label }})</span>
+                        </p>
+                        <p v-if="!sections.mock.available" class="mt-3 text-xs text-amber-400/80">
+                            {{ sections.mock.reason ?? 'în pregătire' }}
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    v-if="sections.mock.available"
+                    type="button"
+                    class="btn-primary mt-4 w-full"
+                    :disabled="startingMock"
+                    @click="startMock"
+                >
+                    {{ startingMock ? 'Se pregătește…' : 'Începe simularea' }}
+                </button>
+
+                <ul v-if="sections.mock.history.length" class="mt-4 space-y-1 border-t border-white/10 pt-3 text-sm">
+                    <li v-for="entry in sections.mock.history" :key="entry.uuid">
+                        <Link
+                            :href="route('practice.play', entry.uuid)"
+                            class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5"
+                        >
+                            <span class="text-slate-400">{{ dateFormat.format(new Date(entry.completed_at)) }}</span>
+                            <span class="tabular-nums">
+                                <strong>{{ nf.format(entry.score) }}</strong>
+                                <span class="text-slate-400"> / {{ entry.auto_points }} p</span>
+                            </span>
+                        </Link>
+                    </li>
+                </ul>
+            </section>
 
             <!-- ============ CLASAMENT ============ -->
             <section>

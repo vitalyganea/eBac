@@ -43,5 +43,7 @@ return [
         'practice.play',
         'practice.hint',
         'practice.answer',
+        'mock.start',
+        'mock.submit',
     ],
 ];

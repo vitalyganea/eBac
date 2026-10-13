@@ -191,3 +191,26 @@ it('ține elevul departe de panou, coadă și telemetrie', function () {
             ->toBe(403, "GET {$url} trebuie să fie interzis elevului");
     }
 });
+
+it('dă fiecărei limitări de rată propria cheie', function () {
+    // `throttle:10,1` fără prefix numără pe aceeași cheie (utilizatorul sau
+    // IP-ul) TOATE rutele limitate. Zece răspunsuri la antrenament blocau
+    // pornirea simulării cu 429.
+    $fara = [];
+
+    foreach (Route::getRoutes() as $route) {
+        // Ruta de upload a Livewire vine din pachet. După ce toate rutele
+        // noastre au prefix, ea e singura pe cheia implicită.
+        if (str_starts_with($route->uri(), 'livewire')) {
+            continue;
+        }
+
+        foreach ($route->gatherMiddleware() as $middleware) {
+            if (is_string($middleware) && preg_match('/^throttle:\d+,\d+$/', $middleware)) {
+                $fara[] = implode('|', $route->methods()).' '.$route->uri()." ({$middleware})";
+            }
+        }
+    }
+
+    expect($fara)->toBeEmpty("Limitări fără prefix:\n".implode("\n", $fara));
+});

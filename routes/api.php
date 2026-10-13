@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function () {
 
         // Același SubmitAnswer pe care îl apelează și clientul web.
         Route::post('/attempts', [AttemptController::class, 'store'])
-            ->middleware('throttle:60,1')
+            ->middleware('throttle:60,1,api-raspuns')
             ->name('api.v1.attempts.store');
     });
 });

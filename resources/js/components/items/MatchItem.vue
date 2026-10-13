@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import MathText from '@/components/MathText.vue';
-import type { Feedback, StudentAnswer, StudentItem } from '@/types';
+import type { ItemFeedback, StudentAnswer, StudentItem } from '@/types';
 
 /** Potrivire: tap pe stânga, apoi tap pe dreapta. Fără drag, la fel ca la ordonare. */
 const props = defineProps<{
     item: StudentItem;
     modelValue: StudentAnswer | null;
-    feedback: Feedback | null;
+    feedback: ItemFeedback | null;
     disabled: boolean;
 }>();
 

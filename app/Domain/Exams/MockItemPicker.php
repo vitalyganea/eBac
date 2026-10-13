@@ -30,8 +30,23 @@ final class MockItemPicker
      */
     public function pick(User $user, int $subjectId, MockPlan $plan): array
     {
+        try {
+            return $this->attempt($user, $subjectId, $plan, preferFresh: true);
+        } catch (MockUnavailable) {
+            // Preferința pentru itemi nevăzuți poate lăsa o secțiune ulterioară
+            // fără tipul de care are nevoie. A doua încercare pune pe primul loc
+            // ca simularea să se poată completa; prospețimea vine pe locul doi.
+            return $this->attempt($user, $subjectId, $plan, preferFresh: false);
+        }
+    }
+
+    /** @throws MockUnavailable */
+    private function attempt(User $user, int $subjectId, MockPlan $plan, bool $preferFresh): array
+    {
         if (! $plan->isSimulable()) {
-            throw new MockUnavailable('Structura acestui examen nu are părți care se pot corecta automat.');
+            // Fie toate subiectele cer corectare umană, fie structura nu are încă
+            // tipuri de întrebări asociate (o disciplină fără conținut).
+            throw new MockUnavailable('Simularea la această disciplină e în pregătire: încă nu avem întrebări pentru subiectele ei.');
         }
 
         $lastSeen = $this->lastSeenInMocks($user);
@@ -45,24 +60,31 @@ final class MockItemPicker
             [$fresh, $seen] = $candidates->partition(fn (Item $i) => ! $lastSeen->has($i->id));
 
             // Tipurile cerute și de secțiunile următoare se folosesc ultimele.
-            // Altfel „Subiectul I" (mcq, match) poate lua toate potrivirile,
-            // iar „Subiectul III" (mcq, match) rămâne fără itemi, deși banca
-            // le-ar ajunge tuturor.
+            // Altfel „Subiectul I" (mcq, numeric) poate lua toate grilele, iar
+            // „Subiectul IV" (match, mcq) rămâne fără itemi, deși banca le-ar
+            // ajunge tuturor. Regula se aplică și itemilor deja văzuți: prima
+            // versiune o aplica doar celor nevăzuți, iar a doua simulare a
+            // aceluiași elev nu mai pornea.
             $laterTypes = collect(array_slice($plan->autoSections, $index + 1))->pluck('types')->flatten()->all();
-            [$shared, $exclusive] = $fresh->partition(fn (Item $i) => in_array($i->type->value, $laterTypes, true));
+            $isShared = fn (Item $i) => in_array($i->type->value, $laterTypes, true);
 
-            $chosen = $this->spreadAcrossSkills($exclusive->shuffle(), $section['items']);
-            $chosen = $chosen->concat(
-                $this->spreadAcrossSkills($shared->shuffle(), $section['items'] - $chosen->count()),
-            );
+            [$freshShared, $freshExclusive] = $fresh->partition($isShared);
+            $oldestFirst = fn (Collection $items) => $items->sortBy(fn (Item $i) => $lastSeen->get($i->id))->values();
+            [$seenShared, $seenExclusive] = $seen->partition($isShared);
 
-            if ($chosen->count() < $section['items']) {
-                $fill = $seen
-                    ->sortBy(fn (Item $i) => $lastSeen->get($i->id))
-                    ->take($section['items'] - $chosen->count());
-                $reused += $fill->count();
-                $chosen = $chosen->concat($fill);
+            $need = $section['items'];
+            $chosen = $this->spreadAcrossSkills($freshExclusive->shuffle(), $need);
+
+            if ($preferFresh) {
+                $chosen = $chosen->concat($this->spreadAcrossSkills($freshShared->shuffle(), $need - $chosen->count()));
+                $fill = $oldestFirst($seenExclusive)->concat($oldestFirst($seenShared));
+            } else {
+                $fill = $oldestFirst($seenExclusive)->concat($freshShared->shuffle())->concat($oldestFirst($seenShared));
             }
+
+            $fill = $fill->take($need - $chosen->count());
+            $reused += $fill->filter(fn (Item $i) => $lastSeen->has($i->id))->count();
+            $chosen = $chosen->concat($fill);
 
             if ($chosen->count() < $section['items']) {
                 throw new MockUnavailable(sprintf(
@@ -103,6 +125,10 @@ final class MockItemPicker
             // Un item semnalat automat ca posibil stricat ar strica nota.
             ->where(fn ($q) => $q->where('item_stats.needs_review', false)->orWhereNull('item_stats.needs_review'))
             ->select('items.*')
+            // Ordinea fizică a rândurilor nu are voie să decidă selecția: un
+            // bug de selecție s-a ascuns în teste tocmai pentru că baza
+            // proaspătă le returna într-o ordine norocoasă.
+            ->inRandomOrder()
             ->with('skills')
             ->get();
     }

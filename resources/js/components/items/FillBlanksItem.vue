@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import MathText from '@/components/MathText.vue';
-import type { Feedback, StudentAnswer, StudentItem } from '@/types';
+import type { ItemFeedback, StudentAnswer, StudentItem } from '@/types';
 
 /** Completare de spații — fill_blanks și balance_equation (coeficienți). */
 const props = defineProps<{
     item: StudentItem;
     modelValue: StudentAnswer | null;
-    feedback: Feedback | null;
+    feedback: ItemFeedback | null;
     disabled: boolean;
 }>();
 
