@@ -40,10 +40,14 @@ const form = useForm({ email: '', password: '', remember: true });
 
             <GoogleButton />
 
-            <p class="text-center text-sm text-slate-400">
-                Nu ai cont?
-                <Link :href="route('register')" class="text-brand-400">Înregistrează-te</Link>
-            </p>
+            <!-- Pereche cu „Intră în cont" de pe înregistrare: o țintă de deget,
+                 nu un cuvânt într-o propoziție. -->
+            <div class="space-y-2 border-t border-white/10 pt-6 text-center">
+                <p class="text-sm text-slate-400">Nu ai cont?</p>
+                <Link :href="route('register')" class="btn-ghost min-h-14 w-full text-base">
+                    Creează cont
+                </Link>
+            </div>
         </div>
     </AppLayout>
 </template>
