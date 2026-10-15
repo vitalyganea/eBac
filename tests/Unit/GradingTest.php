@@ -202,6 +202,16 @@ describe('FillBlanksGrader', function () {
         expect((new FillBlanksGrader)->grade($i, ['values' => ['instr' => 'While', 't9' => '9.0']])->isCorrect)->toBeTrue();
     });
 
+    it('ignoră forma unui răspuns transcris din text', function () {
+        // Engleză, BAC 2024: „Who is the youngest graduate…?" — apostroful din PDF e curbat.
+        $i = item(ItemType::FillBlanks, [], ['values' => ['q3' => ['Kathryn O’Donnell']]]);
+        $g = new FillBlanksGrader;
+
+        expect($g->grade($i, ['values' => ['q3' => "kathryn o'donnell."]])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['values' => ['q3' => '  Kathryn   O’Donnell ']])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['values' => ['q3' => 'David Cunningham']])->isCorrect)->toBeFalse();
+    });
+
     it('dă punctaj parțial pe spații', function () {
         $i = item(ItemType::BalanceEquation, [], ['values' => ['a' => '2', 'b' => '1', 'c' => '2']]);
         $r = (new FillBlanksGrader)->grade($i, ['values' => ['a' => '2', 'b' => '1', 'c' => '9']]);

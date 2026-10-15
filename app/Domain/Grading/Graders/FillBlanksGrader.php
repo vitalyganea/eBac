@@ -44,7 +44,7 @@ final class FillBlanksGrader implements Grader
                     ? self::sameNumber($given, $variant)
                     : ($caseSensitive
                     ? $given === $variant
-                    : mb_strtolower($given) === mb_strtolower($variant));
+                    : self::text($given) === self::text($variant));
 
                 if ($matches && $given !== '') {
                     $correctBlanks[] = (string) $blank;
@@ -57,6 +57,19 @@ final class FillBlanksGrader implements Grader
             count($correctBlanks) / count($expected),
             ['correct_blanks' => $correctBlanks, 'total_blanks' => count($expected)]
         );
+    }
+
+    /**
+     * Forma unui răspuns scris nu e conținutul lui: „Stephen Ritz.", „stephen
+     * ritz" și „‘Stephen Ritz’" sunt același răspuns transcris din text, iar
+     * apostroful curbat din PDF (O’Donnell) nu se poate tasta pe orice telefon.
+     */
+    private static function text(string $value): string
+    {
+        $value = strtr(mb_strtolower($value), ['’' => "'", '‘' => "'", '“' => '"', '”' => '"', '„' => '"']);
+        $value = preg_replace('/\s+/u', ' ', $value) ?? $value;
+
+        return trim($value, " \t.,;:!?\"'");
     }
 
     private static function sameNumber(string $given, string $expected): bool

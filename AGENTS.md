@@ -473,10 +473,10 @@ despre punctaj sau barem.
 
 `ContentIntegrityTest` verifică regula pe disciplinele auditate (lista
 `$auditate`), care crește pe măsură ce se face auditul. Starea la 2026-10-13:
-limba română, matematica, informatica și istoria sunt construite din teste
-ANCE (testele 2024–2026, la matematică 2021–2026; `database/seeders/Matematica`,
-`Informatica`, `Istorie`); itemii vechi, fără sursă, sunt retrași, nu șterși. Cei 88 de itemi
-de la engleză sunt încă scriși original și trebuie auditați.
+toate disciplinele cu itemi — limba română, matematica, informatica, istoria
+și engleza — sunt construite din teste ANCE (testele 2024–2026, la matematică
+2021–2026, la engleză 2022–2026; `database/seeders/Matematica`, `Informatica`,
+`Istorie`, `Engleza`); itemii vechi, fără sursă, sunt retrași, nu șterși.
 
 La istorie, ca la română, toată proba se corectează pe barem; în Teste se
 exersează doar sarcinile „Identifică în sursă", cu sursa reală din test,
@@ -508,9 +508,16 @@ Subiectul I comprehensiune scrisă — 30p (auto-corectabil), Subiectul II eseu
 structurat 180–200 de cuvinte — 40p, Subiectul III articol/scrisoare pe o temă
 de cultură — 30p. **Producerea scrisă valorează 70 din 100 de puncte.**
 
-Itemii existenți antrenează competențele PE CARE SE SPRIJINĂ scrisul —
-gramatică B1, vocabular tematic, conectori, registru, structura eseului — plus
-Subiectul I. Nu pretinde nicăieri în interfață că acoperă eseul: `structure` din
+Itemii sunt sarcinile Subiectului I din testele ANCE. Baremul de limbă străină
+nu dă chei — răspunsul corect e „în baza textului" —, deci explicația citează
+fraza care îl justifică. Textul întreg (400–450 de cuvinte) nu se reproduce:
+fiecare item arată doar fragmentul de care are nevoie, iar `source_ref` duce la
+PDF. Ordonarea ideilor și ideea principală cer textul întreg, deci lipsesc.
+Simularea nu poate folosi variante „cu alte date" — ar fi texte inventate —, așa
+că folosește două teste întregi (2022 și 2023, sesiunea suplimentară), ținute în
+afara antrenamentului. Gramatica și registrul stau în lecții.
+
+Nu pretinde nicăieri în interfață că acoperă eseul: `structure` din
 `exam_blueprints` marchează fiecare subiect cu `auto_gradable`.
 
 Eseul are nevoie de autoevaluare pe barem, eseuri model adnotate și feedback —

@@ -42,6 +42,9 @@ function blankClass(key: string): string {
             v-if="item.payload.passage"
             class="max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm leading-relaxed text-slate-300"
         >
+            <p v-if="item.payload.passage_title" class="mb-2 font-semibold text-slate-100">
+                {{ item.payload.passage_title }}
+            </p>
             <p class="whitespace-pre-line">{{ item.payload.passage }}</p>
         </div>
 

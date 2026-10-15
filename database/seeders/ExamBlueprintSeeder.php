@@ -125,7 +125,8 @@ class ExamBlueprintSeeder extends Seeder
         }
 
         if ($engleza) {
-            // Programa ANCE 2021 „Limba străină": nivel B1 (CECRL 2018),
+            // Programa ANCE 2021 „Limba străină" și testele ANCE (12_len_test_sb26.pdf):
+            // nivel B1 (CECRL 2018),
             // 3 subiecte, 180 de minute, 30 + 40 + 30 = 100 de puncte.
             //
             // ATENȚIE la proporție: 70 din 100 de puncte sunt PRODUCERE SCRISĂ,
@@ -144,8 +145,10 @@ class ExamBlueprintSeeder extends Seeder
                         ['name' => 'Subiectul I', 'items' => 1, 'points' => 30,
                             'types' => ['mcq', 'fill_blanks', 'match'],
                             'auto_gradable' => true,
-                            'mock_items' => 5,
-                            'note' => 'Comprehensiunea scrisă a unui text nonliterar/funcțional necunoscut de 400-450 de cuvinte.'],
+                            // Sarcinile I–V din testele ANCE rezervate (11 itemi);
+                            // VI și VII cer textul întreg și nu se simulează.
+                            'mock_items' => 11,
+                            'note' => 'Comprehensiunea scrisă a unui text nonliterar/funcțional necunoscut de 400-450 de cuvinte. Simularea arată fragmentele din text de care are nevoie fiecare sarcină; ordonarea ideilor și ideea principală (10 puncte) cer textul întreg.'],
                         ['name' => 'Subiectul II', 'items' => 1, 'points' => 40,
                             'types' => [],
                             'auto_gradable' => false,
