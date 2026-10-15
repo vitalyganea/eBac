@@ -31,6 +31,7 @@ const props = defineProps<{
     sections: {
         course: { available: boolean; lessons_count: number };
         tests: { available: boolean; items_count: number };
+        formulas: { available: boolean; count: number };
         mock: {
             available: boolean;
             reason: string | null;
@@ -137,8 +138,8 @@ const dateFormat = new Intl.DateTimeFormat('ro-MD', { day: 'numeric', month: 'sh
             </Link>
 
             <!-- ============ CE POȚI FACE AICI ============ -->
-            <div class="grid gap-3 sm:grid-cols-2">
-<component
+            <div class="grid gap-3 sm:grid-cols-3">
+                <component
                     :is="sections.course.available ? 'a' : 'div'"
                     :href="sections.course.available ? route('course.index', subject.slug) : undefined"
                     class="card block text-left transition"
@@ -178,6 +179,28 @@ const dateFormat = new Intl.DateTimeFormat('ro-MD', { day: 'numeric', month: 'sh
                             : 'conținut în pregătire' }}
                     </p>
                 </button>
+
+                <!-- Formulele: de consultat și de învățat cu „ascunde și verifică".
+                     Vizibile și fără conținut, marcate cinstit (§2a). -->
+                <component
+                    :is="sections.formulas.available ? Link : 'div'"
+                    :href="sections.formulas.available ? route('formulas.index', subject.slug) : undefined"
+                    class="card block text-left transition"
+                    :class="sections.formulas.available
+                        ? 'hover:border-white/25 active:scale-[0.99]'
+                        : 'opacity-60'"
+                >
+                    <p class="text-2xl text-slate-300"><Icon name="sigma" :stroke-width="1.75" /></p>
+                    <p class="mt-2 font-semibold">Formule</p>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Tot ce trebuie să știi, cu ce apare în anexa testului.
+                    </p>
+                    <p class="mt-3 text-xs" :class="sections.formulas.available ? 'text-brand-400' : 'text-amber-400/80'">
+                        {{ sections.formulas.available
+                            ? nf.format(sections.formulas.count) + ' formule'
+                            : 'în pregătire' }}
+                    </p>
+                </component>
             </div>
 
             <!-- ============ SIMULARE BAC ============ -->

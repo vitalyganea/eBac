@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             ExamBlueprintSeeder::class,
             MathContentSeeder::class,
             MathLessonSeeder::class,
+            MathFormulaSeeder::class,
             InformaticaContentSeeder::class,
             InformaticaLessonSeeder::class,
             EnglezaContentSeeder::class,

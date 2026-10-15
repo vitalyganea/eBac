@@ -7,6 +7,7 @@ use App\Domain\Exams\MockItemPicker;
 use App\Domain\Leaderboards\Leaderboard;
 use App\Domain\Xp\Level;
 use App\Enums\SessionMode;
+use App\Models\Formula;
 use App\Models\LearningGap;
 use App\Models\Lesson;
 use App\Models\PracticeSession;
@@ -24,9 +25,10 @@ use Inertia\Response;
  * indexabilă, pentru vizitatori anonimi. Aceasta e spațiul de lucru: progresul
  * tău, ce poți face aici și unde te afli față de ceilalți.
  *
- * Trei zone, în ordinea în care le folosește elevul:
+ * Zonele, în ordinea în care le folosește elevul:
  *   Curs       — teoria (în construcție)
  *   Teste      — antrenamentul, funcțional
+ *   Formule    — de consultat și de învățat („ascunde și verifică")
  *   Simulare   — structura examenului pe itemi de holdout, cu termen
  *   Clasament  — poziția la ACEASTĂ disciplină
  */
@@ -56,6 +58,8 @@ class SubjectHubController extends Controller
         $lessonCount = Lesson::published()
             ->whereHas('skill', fn ($q) => $q->where('subject_id', $subject->id))
             ->count();
+
+        $formulaCount = Formula::where('subject_id', $subject->id)->count();
 
         return Inertia::render('Subjects/Show', [
             'subject' => [
@@ -91,6 +95,7 @@ class SubjectHubController extends Controller
                     'lessons_count' => $lessonCount,
                 ],
                 'tests' => ['available' => $itemCount > 0, 'items_count' => $itemCount],
+                'formulas' => ['available' => $formulaCount > 0, 'count' => $formulaCount],
                 'mock' => $this->mockSection($user, $subject->id, $blueprints, $picker),
             ],
 

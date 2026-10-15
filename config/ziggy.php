@@ -37,6 +37,8 @@ return [
         'course.index',
         'course.show',
         'course.complete',
+        'formulas.index',
+        'formulas.progress',
         'subjects.edit',
         'subjects.update',
         'practice.start',

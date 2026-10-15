@@ -127,6 +127,7 @@ pentru că ar vedea cheile de corectare.
 | XP, nivel și clasament pe disciplină | ✅ poziție + total + progres |
 | Hub disciplină: Curs / Teste / Clasament | ✅ |
 | Curs: matematică | 8 lecții · 68% din pondere |
+| Formule: matematică | 73 de formule: 52 apărute în anexele testelor ANCE 2021–2026 (cu numărul de apariții pe profil), 21 de știut pe de rost din programă; mod „ascunde și verifică” |
 | Curs: limba engleză | 4 lecții · 58% din pondere |
 | Curs: informatică | 4 lecții · 38% din pondere |
 | Curs: istorie | 2 lecții · 18% din pondere |

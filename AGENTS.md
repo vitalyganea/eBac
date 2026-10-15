@@ -244,6 +244,7 @@ autentificat, distinct de pagina publică indexabilă `/{subject}`:
 
     Curs       teoria — în construcție, declarată explicit ca atare
     Teste      antrenamentul — funcțional
+    Formule    de consultat și de învățat („ascunde și verifică"), §10k
     Clasament  poziția la ACEASTĂ disciplină, cu rândul propriu
 
 Cursul apare vizibil ca „în construcție" în loc să fie ascuns: elevul vede unde
@@ -458,6 +459,24 @@ titluri — stau în `resources/fonts`, generate cu `bin/fonts.sh`. NU de pe Goo
 Fonts: utilizatorii sunt minori (§9). Fiecare font e tăiat în latin, literele
 românești (~3 KB) și chirilic, cu `unicode-range`; fișierul „latin-ext" întreg
 (până la 118 KB) s-ar fi descărcat la primul „ș". Nu-l adăuga înapoi.
+
+## 10k. Formule: ce apare în anexă și ce trebuie știut
+
+Testele ANCE de matematică au la final o anexă cu formule, dar FIECARE TEST
+își alege formulele după itemii lui. `formulas.annex` ține exact testele în
+care a apărut o formulă (`r_sb26`, `u_ss24`…, citite din cele 23 de anexe
+2021–2026), iar eticheta e „în anexă la 11 din 12 teste", nu „o primești la
+examen". Ce n-a apărut niciodată e „de știut pe de rost", cu sursa în
+programă (unitatea de conținut). Profilul doar alege ce numărătoare se
+arată (§2a); arte și sport dau testul de la umanist.
+
+„Ascunde și verifică" nu dă XP și nu atinge `mastery` (§6): a recunoaște o
+formulă nu înseamnă a ști s-o aplici. Bifele stau în `formula_progress`,
+șterse odată cu contul.
+
+Formulele lungi se rup pe rânduri la seeding (`MathFormulaSeeder::stacked`):
+KaTeX nu rupe singur o formulă afișată, iar pe un telefon de 360px cinci
+egalități pe un rând ies din ecran.
 
 ## 11. Conținutul se validează automat, nu prin recitire
 

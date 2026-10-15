@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\Auth\GoogleController;
 use App\Http\Controllers\Web\Auth\UsernameController;
 use App\Http\Controllers\Web\CourseController;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\FormulaController;
 use App\Http\Controllers\Web\GapController;
 use App\Http\Controllers\Web\MockExamController;
 use App\Http\Controllers\Web\PracticeController;
@@ -130,6 +131,12 @@ Route::middleware(['auth', 'username.ok'])->group(function () {
     Route::get('/disciplina/{slug}/curs/{skill}', [CourseController::class, 'show'])->name('course.show');
     Route::post('/disciplina/{slug}/curs/{skill}/parcurs', [CourseController::class, 'complete'])
         ->name('course.complete');
+
+    // Formule: lista de consultat și „ascunde și verifică". Fără XP (§6).
+    Route::get('/disciplina/{slug}/formule', [FormulaController::class, 'index'])->name('formulas.index');
+    Route::post('/formule/{formula}/progres', [FormulaController::class, 'progress'])
+        ->middleware('throttle:120,1,formule')
+        ->name('formulas.progress');
 
     // Simularea BAC: structura examenului, itemi de holdout, termen pe server.
     Route::post('/simulare', [MockExamController::class, 'start'])

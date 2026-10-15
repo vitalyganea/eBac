@@ -56,6 +56,7 @@ const ICONS = [
     'log-out',              // deconectare, în antet
     'clipboard-check',      // simularea BAC
     'timer',                // timpul rămas în simulare
+    'sigma',                // secțiunea Formule
 
     // Disciplinele (`subjects.icon`)
     'radical',              // matematică

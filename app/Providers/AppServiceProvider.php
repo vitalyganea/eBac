@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
         // create DUPĂ ele, iar Filament își înregistrează rutele (`{record}`,
         // `{export}`, `{import}`) în propriul provider.
         Route::pattern('gap', '[0-9]+');
+        Route::pattern('formula', '[0-9]+');
         Route::pattern('record', '[0-9]+');
         Route::pattern('export', '[0-9]+');
         Route::pattern('import', '[0-9]+');
