@@ -496,6 +496,10 @@ toate disciplinele cu itemi — limba română, matematica, informatica, istoria
 și engleza — sunt construite din teste ANCE (testele 2024–2026, la matematică
 2021–2026, la engleză 2022–2026; `database/seeders/Matematica`, `Informatica`,
 `Istorie`, `Engleza`); itemii vechi, fără sursă, sunt retrași, nu șterși.
+Geografia pornește din programa ANCE (testul model cu barem și exemplele de
+itemi): doar itemii care se rezolvă din ce e pe ecran. Cei care cer atlasul —
+coordonate, distanțe, ora pe Glob, harta-contur — așteaptă o componentă de
+hartă. Climogramele și piramidele se desenează din cifre (§10e).
 
 La istorie, ca la română, toată proba se corectează pe barem; în Teste se
 exersează doar sarcinile „Identifică în sursă", cu sursa reală din test,

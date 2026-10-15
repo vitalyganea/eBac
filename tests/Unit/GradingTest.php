@@ -202,6 +202,20 @@ describe('FillBlanksGrader', function () {
         expect((new FillBlanksGrader)->grade($i, ['values' => ['instr' => 'While', 't9' => '9.0']])->isCorrect)->toBeTrue();
     });
 
+    it('acceptă eroarea admisibilă din barem, pe spațiu', function () {
+        // Geografie: temperatura de pe climogramă, „eroare admisibilă: ±1°".
+        $i = item(ItemType::FillBlanks, [], [
+            'values' => ['cald' => ['28'], 'an' => ['2150']],
+            'numeric' => true,
+            'tolerance' => ['cald' => 1],
+        ]);
+        $g = new FillBlanksGrader;
+
+        expect($g->grade($i, ['values' => ['cald' => '27', 'an' => '2150']])->isCorrect)->toBeTrue()
+            ->and($g->grade($i, ['values' => ['cald' => '29,5', 'an' => '2150']])->isCorrect)->toBeFalse()
+            ->and($g->grade($i, ['values' => ['cald' => '28', 'an' => '2151']])->isCorrect)->toBeFalse();
+    });
+
     it('ignoră forma unui răspuns transcris din text', function () {
         // Engleză, BAC 2024: „Who is the youngest graduate…?" — apostroful din PDF e curbat.
         $i = item(ItemType::FillBlanks, [], ['values' => ['q3' => ['Kathryn O’Donnell']]]);

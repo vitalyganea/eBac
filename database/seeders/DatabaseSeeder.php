@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             IstorieLessonSeeder::class,
             RomanaContentSeeder::class,
             RomanaLessonSeeder::class,
+            GeografieContentSeeder::class,
         ]);
     }
 }

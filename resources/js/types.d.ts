@@ -49,8 +49,40 @@ export interface StudentItem {
         /** Variante de cod per limbaj: examenul acceptă Pascal sau C/C++. */
         code_variants?: Record<string, string>;
         image?: string;
+        /** Grafic desenat din date (climogramă, piramide ale populației) — §10e. */
+        chart?: ItemChartData;
     };
 }
+
+export interface ClimogramChart {
+    type: 'climogram';
+    /** 12 valori, în mm. */
+    precip: number[];
+    /** 12 valori, în °C. */
+    temp: number[];
+    precip_max: number;
+    temp_range: [number, number];
+    /** Numărul de intervale pe axe, ales ca pașii să fie rotunzi pe ambele. */
+    ticks: number;
+    annual_precip?: number;
+}
+
+export interface PyramidSeries {
+    title: string;
+    /** Procente pe grupe de vârstă, de la cea mai tânără. */
+    male: number[];
+    female: number[];
+}
+
+export interface PyramidsChart {
+    type: 'pyramids';
+    groups: string[];
+    series: PyramidSeries[];
+    max: number;
+    source?: string;
+}
+
+export type ItemChartData = ClimogramChart | PyramidsChart;
 
 /**
  * Răspunsul elevului. Fiecare tip de item își compune propria formă.

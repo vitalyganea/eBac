@@ -15,6 +15,9 @@ use App\Models\Item;
  *
  * Cu `numeric`, spațiile se compară ca VALORI, nu ca text: la „p = ___,
  * q = ___" din baremul ANCE, „−14", „-14" și „-28/2" sunt același răspuns.
+ *
+ * `tolerance: {"cald": 1}` e „eroarea admisibilă" din barem, pe spațiu: la
+ * geografie, temperatura citită de pe climogramă se acceptă cu ±1°.
  */
 final class FillBlanksGrader implements Grader
 {
@@ -41,7 +44,7 @@ final class FillBlanksGrader implements Grader
                 // Cu `numeric`, un spațiu cu răspuns NUMERIC se compară ca
                 // valoare; unul cu răspuns text („while", „xx") rămâne text.
                 $matches = $numeric && NumberExpression::evaluate($variant) !== null
-                    ? self::sameNumber($given, $variant)
+                    ? self::sameNumber($given, $variant, (float) ($key['tolerance'][$blank] ?? 1e-6))
                     : ($caseSensitive
                     ? $given === $variant
                     : self::text($given) === self::text($variant));
@@ -72,13 +75,13 @@ final class FillBlanksGrader implements Grader
         return trim($value, " \t.,;:!?\"'");
     }
 
-    private static function sameNumber(string $given, string $expected): bool
+    private static function sameNumber(string $given, string $expected, float $tolerance): bool
     {
         // „p = 2" în spațiul pentru p: elevul a scris și numele.
         $given = preg_replace('/^[a-zA-Zα-ω]\w*\s*=\s*/u', '', $given) ?? $given;
         $a = NumberExpression::evaluate(str_replace(',', '.', $given));
         $b = NumberExpression::evaluate($expected);
 
-        return $a !== null && $b !== null && abs($a - $b) <= 1e-6;
+        return $a !== null && $b !== null && abs($a - $b) <= $tolerance + 1e-9;
     }
 }

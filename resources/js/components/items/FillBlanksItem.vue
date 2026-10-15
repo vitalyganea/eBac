@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import CodeBlock from '@/components/CodeBlock.vue';
+import ItemChart from '@/components/charts/ItemChart.vue';
 import MathText from '@/components/MathText.vue';
 import type { ItemFeedback, StudentAnswer, StudentItem } from '@/types';
 
@@ -51,6 +52,9 @@ function blankClass(key: string): string {
         <p class="text-lg leading-relaxed">
             <MathText :text="item.payload.stem" />
         </p>
+
+        <!-- Geografie: climograma, piramidele populației — desenate din date. -->
+        <ItemChart v-if="item.payload.chart" :chart="item.payload.chart" />
 
         <!-- Informatică: programul din test, în limbajul ales de elev (§12). -->
         <CodeBlock
