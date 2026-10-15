@@ -7,6 +7,7 @@ use App\Domain\Exams\MockItemPicker;
 use App\Domain\Leaderboards\Leaderboard;
 use App\Domain\Xp\Level;
 use App\Enums\SessionMode;
+use App\Models\EssayPrompt;
 use App\Models\Formula;
 use App\Models\LearningGap;
 use App\Models\Lesson;
@@ -29,6 +30,7 @@ use Inertia\Response;
  *   Curs       — teoria (în construcție)
  *   Teste      — antrenamentul, funcțional
  *   Formule    — de consultat și de învățat („ascunde și verifică")
+ *   Eseu       — autoevaluarea producerii scrise, pe grila baremului
  *   Simulare   — structura examenului pe itemi de holdout, cu termen
  *   Clasament  — poziția la ACEASTĂ disciplină
  */
@@ -96,6 +98,8 @@ class SubjectHubController extends Controller
                 ],
                 'tests' => ['available' => $itemCount > 0, 'items_count' => $itemCount],
                 'formulas' => ['available' => $formulaCount > 0, 'count' => $formulaCount],
+                // Doar unde proba are producere scrisă; altfel cardul nu apare deloc.
+                'essays' => ['count' => EssayPrompt::where('subject_id', $subject->id)->count()],
                 'mock' => $this->mockSection($user, $subject->id, $blueprints, $picker),
             ],
 

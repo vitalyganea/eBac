@@ -32,6 +32,7 @@ const props = defineProps<{
         course: { available: boolean; lessons_count: number };
         tests: { available: boolean; items_count: number };
         formulas: { available: boolean; count: number };
+        essays: { count: number };
         mock: {
             available: boolean;
             reason: string | null;
@@ -138,7 +139,7 @@ const dateFormat = new Intl.DateTimeFormat('ro-MD', { day: 'numeric', month: 'sh
             </Link>
 
             <!-- ============ CE POȚI FACE AICI ============ -->
-            <div class="grid gap-3 sm:grid-cols-3">
+            <div class="grid gap-3 sm:grid-cols-2">
                 <component
                     :is="sections.course.available ? 'a' : 'div'"
                     :href="sections.course.available ? route('course.index', subject.slug) : undefined"
@@ -201,6 +202,20 @@ const dateFormat = new Intl.DateTimeFormat('ro-MD', { day: 'numeric', month: 'sh
                             : 'în pregătire' }}
                     </p>
                 </component>
+
+                <!-- Eseul: doar la disciplinele cu producere scrisă (română, engleză). -->
+                <Link
+                    v-if="sections.essays.count"
+                    :href="route('essays.index', subject.slug)"
+                    class="card block text-left transition hover:border-white/25 active:scale-[0.99]"
+                >
+                    <p class="text-2xl text-slate-300"><Icon name="book-open-text" :stroke-width="1.75" /></p>
+                    <p class="mt-2 font-semibold">Eseu</p>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Scrii pe cerințele ANCE, apoi te notezi singur pe barem.
+                    </p>
+                    <p class="mt-3 text-xs text-brand-400">{{ nf.format(sections.essays.count) }} cerințe</p>
+                </Link>
             </div>
 
             <!-- ============ SIMULARE BAC ============ -->

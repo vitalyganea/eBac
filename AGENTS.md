@@ -245,6 +245,7 @@ autentificat, distinct de pagina publică indexabilă `/{subject}`:
     Curs       teoria — în construcție, declarată explicit ca atare
     Teste      antrenamentul — funcțional
     Formule    de consultat și de învățat („ascunde și verifică"), §10k
+    Eseu       autoevaluarea producerii scrise pe barem, §10l
     Clasament  poziția la ACEASTĂ disciplină, cu rândul propriu
 
 Cursul apare vizibil ca „în construcție" în loc să fie ascuns: elevul vede unde
@@ -478,6 +479,29 @@ Formulele lungi se rup pe rânduri la seeding (`MathFormulaSeeder::stacked`):
 KaTeX nu rupe singur o formulă afișată, iar pe un telefon de 360px cinci
 egalități pe un rând ies din ecran.
 
+## 10l. Eseul: autoevaluare pe grila baremului, nu corectare automată
+
+Producerea scrisă nu se poate corecta automat fără a ghici, deci platforma nu
+pretinde că o face. Elevul scrie pe o cerință ANCE reală, apoi se notează
+singur pe grila baremului ACELUIAȘI test (`essay_prompts.rubric`). Baremul s-a
+schimbat de la an la an (engleza: 2022–23, 2024–25, 2026; româna: 2024–25,
+2026, cu grile diferite la real și umanist), iar fiecare cerință poartă grila
+anului ei. `EssaySeeder` refuză o grilă al cărei maxim nu dă exact totalul
+subiectului.
+
+Ce se poate calcula se calculează: volumul de cuvinte și plafonul criteriilor
+de greșeli („1 punct la fiecare 5 greșeli", din maximul benzii de volum).
+Restul îl bifează elevul. Totalul salvat îl dă `App\Domain\Essays\ScoreEssay`
+pe server; un nivel care nu există în barem e respins, nu rotunjit.
+
+Fără XP (§6): nota e aleasă de elev, deci orice recompensă l-ar face s-o
+umfle. Fără corector ortografic în câmpul de text: la examen nu există.
+Eseurile sunt STRICT PRIVATE, ca lista „Ce nu am înțeles" (§10h) — 404 pentru
+oricine altcineva — și se șterg odată cu contul.
+
+La română, redactarea (20 p.) se notează pe toată lucrarea, deci nu intră în
+grila eseului.
+
 ## 11. Conținutul se validează automat, nu prin recitire
 
 `ContentIntegrityTest` verifică structural tot conținutul publicat: cheia de
@@ -562,9 +586,8 @@ afara antrenamentului. Gramatica și registrul stau în lecții.
 Nu pretinde nicăieri în interfață că acoperă eseul: `structure` din
 `exam_blueprints` marchează fiecare subiect cu `auto_gradable`.
 
-Eseul are nevoie de autoevaluare pe barem, eseuri model adnotate și feedback —
-muncă editorială, nu generare de itemi. Aceeași limitare se aplică la Limba și
-literatura română.
+Eseul și articolul se exersează prin autoevaluare pe barem (§10l), nu prin
+itemi. Eseurile model adnotate rămân muncă editorială, încă nefăcută.
 
 Convenția de limbă la itemii de limbi străine: enunț și variante în limba
 străină, indicii și explicații în română. `items.language` rămâne `ro` — el

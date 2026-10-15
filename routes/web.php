@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\Auth\GoogleController;
 use App\Http\Controllers\Web\Auth\UsernameController;
 use App\Http\Controllers\Web\CourseController;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\EssayController;
 use App\Http\Controllers\Web\FormulaController;
 use App\Http\Controllers\Web\GapController;
 use App\Http\Controllers\Web\MockExamController;
@@ -131,6 +132,14 @@ Route::middleware(['auth', 'username.ok'])->group(function () {
     Route::get('/disciplina/{slug}/curs/{skill}', [CourseController::class, 'show'])->name('course.show');
     Route::post('/disciplina/{slug}/curs/{skill}/parcurs', [CourseController::class, 'complete'])
         ->name('course.complete');
+
+    // Eseu: scrii, apoi te notezi singur pe grila baremului. Fără XP (§6), strict privat.
+    Route::get('/disciplina/{slug}/eseu', [EssayController::class, 'index'])->name('essays.index');
+    Route::get('/eseu/{essayPrompt}', [EssayController::class, 'show'])->name('essays.show');
+    Route::post('/eseu/{essayPrompt}/autoevaluare', [EssayController::class, 'store'])
+        ->middleware('throttle:30,1,eseu')
+        ->name('essays.store');
+    Route::get('/eseu/rezultat/{essayAttempt}', [EssayController::class, 'attempt'])->name('essays.attempt');
 
     // Formule: lista de consultat și „ascunde și verifică". Fără XP (§6).
     Route::get('/disciplina/{slug}/formule', [FormulaController::class, 'index'])->name('formulas.index');

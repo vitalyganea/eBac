@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             RomanaContentSeeder::class,
             RomanaLessonSeeder::class,
             GeografieContentSeeder::class,
+            EssaySeeder::class,
         ]);
     }
 }

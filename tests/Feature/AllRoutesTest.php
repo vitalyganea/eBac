@@ -2,6 +2,8 @@
 
 use App\Domain\Sessions\StartSession;
 use App\Enums\SessionMode;
+use App\Models\EssayAttempt;
+use App\Models\EssayPrompt;
 use App\Models\Formula;
 use App\Models\Item;
 use App\Models\LearningGap;
@@ -59,6 +61,11 @@ beforeEach(function () {
                 ? LearningGap::create(['user_id' => $user->id, 'skill_id' => $this->lesson->skill_id, 'source' => 'lesson'])->id
                 : 1,
             'formula' => Formula::firstOrFail()->id,
+            'essayPrompt' => EssayPrompt::firstOrFail()->slug,
+            'essayAttempt' => $user
+                ? EssayAttempt::create(['user_id' => $user->id, 'essay_prompt_id' => EssayPrompt::firstOrFail()->id,
+                    'answers' => [], 'breakdown' => [], 'score' => 0, 'max_score' => 40])->id
+                : 1,
         ];
     }
 });
@@ -127,7 +134,7 @@ it('nicio rută nu răspunde cu 5xx, pentru niciun tip de utilizator', function 
                 $this->app['auth']->shouldUse('web');
 
                 $url = urlFor($route, array_fill_keys(
-                    ['session', 'gap', 'formula', 'slug', 'subject', 'skill', 'year', 'record', 'export', 'import', 'id', 'tag', 'path', 'component', 'filename'],
+                    ['session', 'gap', 'formula', 'essayPrompt', 'essayAttempt', 'slug', 'subject', 'skill', 'year', 'record', 'export', 'import', 'id', 'tag', 'path', 'component', 'filename'],
                     $invalid,
                 ));
 

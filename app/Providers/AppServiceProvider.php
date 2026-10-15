@@ -26,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         // `{export}`, `{import}`) în propriul provider.
         Route::pattern('gap', '[0-9]+');
         Route::pattern('formula', '[0-9]+');
+        Route::pattern('essayAttempt', '[0-9]+');
         Route::pattern('record', '[0-9]+');
         Route::pattern('export', '[0-9]+');
         Route::pattern('import', '[0-9]+');
