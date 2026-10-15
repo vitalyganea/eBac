@@ -88,10 +88,14 @@ const form = useForm({
 
             <GoogleButton label="Înscrie-te cu Google" />
 
-            <p class="text-center text-sm text-slate-400">
-                Ai deja cont?
-                <Link :href="route('login')" class="text-brand-400">Intră</Link>
-            </p>
+            <!-- Cine a ajuns aici din greșeală are deja cont: ieșirea spre logare
+                 trebuie să fie o țintă de deget, nu un cuvânt într-o propoziție. -->
+            <div class="space-y-2 border-t border-white/10 pt-6 text-center">
+                <p class="text-sm text-slate-400">Ai deja cont?</p>
+                <Link :href="route('login')" class="btn-ghost min-h-14 w-full text-base">
+                    Intră în cont
+                </Link>
+            </div>
         </div>
     </AppLayout>
 </template>
