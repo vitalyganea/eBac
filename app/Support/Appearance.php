@@ -66,7 +66,7 @@ final class Appearance
      */
     public static function themeColor(?Request $request = null): string
     {
-        return self::theme($request) === 'light' ? '#f8fafc' : '#0f172a';
+        return self::theme($request) === 'light' ? '#ffffff' : '#0a1636';
     }
 
     /**

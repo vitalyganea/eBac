@@ -6,10 +6,13 @@
         "build": "vite build",
         "dev": "vite",
         "icons": "node bin/icons.mjs",
+        "fonts": "bin/fonts.sh",
         "typecheck": "vue-tsc --noEmit",
         "bundle-size": "node bin/bundle-size.mjs"
     },
     "devDependencies": {
+        "@fontsource-variable/onest": "^5.3.1",
+        "@fontsource-variable/unbounded": "^5.3.0",
         "@tailwindcss/vite": "^4.0.0",
         "@types/node": "^26.4.1",
         "@vitejs/plugin-vue": "^6.0.8",

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Icon from '@/components/Icon.vue';
+import type { Gamification } from '@/types';
 
 interface SubjectRank {
     rank: number;
@@ -22,29 +24,74 @@ interface DashboardSubject {
     open_gaps: number;
 }
 
-defineProps<{
+const props = defineProps<{
     subjects: DashboardSubject[];
     exam: { name: string; days_left: number | null; phase: string | null } | null;
     leaderboard_opt_in: boolean;
 }>();
 
-const phaseLabels: Record<string, string> = {
-    acumulare: 'Acumulare — materie nouă',
-    consolidare: 'Consolidare — exersare mixtă',
-    simulari: 'Simulări săptămânale',
-    'puncte-slabe': 'Doar puncte slabe',
-    formule: 'Doar formule și greșeli tipice',
-};
+const page = usePage();
+const game = computed<Gamification | null>(() => page.props.gamification ?? null);
 
-function openSubject(subject: string) {
-    router.get(route('subject.show', subject));
-}
+const phaseLabels: Record<string, string> = {
+    acumulare: 'Acum e perioada de materie nouă.',
+    consolidare: 'Acum e perioada de exersare mixtă.',
+    simulari: 'Acum e perioada simulărilor săptămânale.',
+    'puncte-slabe': 'Acum lucrăm doar pe punctele slabe.',
+    formule: 'Acum repetăm formulele și greșelile tipice.',
+};
 
 const nf = new Intl.NumberFormat('ro-MD');
 
-/** Procentul de utilizatori pe care îi depășește — mai motivant decât poziția brută. */
-function percentile(rank: SubjectRank): number {
-    return Math.round(((rank.total - rank.rank) / Math.max(1, rank.total - 1)) * 100);
+/** „1 zi", „19 zile", „229 de zile" — de la 20 în sus, româna cere „de". */
+function days(n: number): string {
+    if (n === 1) return '1 zi';
+    const rest = n % 100;
+    return rest === 0 || rest >= 20 ? `${nf.format(n)} de zile` : `${nf.format(n)} zile`;
+}
+
+/**
+ * Disciplina de pe butonul mare: cea de profil, dacă are conținut; altfel cea
+ * cu cele mai puține răspunsuri corecte. Panoul răspunde la „ce fac acum?",
+ * nu doar arată o listă din care elevul trebuie să aleagă singur.
+ */
+const next = computed<DashboardSubject | null>(() => {
+    const playable = props.subjects.filter((s) => s.is_playable);
+    return (
+        playable.find((s) => s.is_primary) ??
+        [...playable].sort((a, b) => (a.accuracy ?? 0) - (b.accuracy ?? 0))[0] ??
+        null
+    );
+});
+
+const starting = ref(false);
+
+function startPractice(subject: DashboardSubject) {
+    starting.value = true;
+    router.post(
+        route('practice.start'),
+        { subject: subject.slug, mode: 'practice' },
+        { onFinish: () => (starting.value = false) },
+    );
+}
+
+const dailyPct = computed(() =>
+    game.value ? Math.min(100, Math.round((game.value.xp_today / game.value.daily_cap) * 100)) : 0,
+);
+
+// Disciplinele fără conținut rămân vizibile și selectabile (§2a), dar la coadă:
+// sus stă ce se poate exersa azi.
+const ordered = computed(() => [
+    ...props.subjects.filter((s) => s.is_playable),
+    ...props.subjects.filter((s) => !s.is_playable),
+]);
+
+function caption(subject: DashboardSubject): string {
+    if (!subject.is_playable) return 'Conținut în pregătire';
+    if (subject.rank) {
+        return `locul ${nf.format(subject.rank.rank)} din ${nf.format(subject.rank.total)}, ${nf.format(subject.xp)} XP`;
+    }
+    return `${nf.format(subject.items_count)} întrebări, încă fără loc în clasament`;
 }
 </script>
 
@@ -52,92 +99,104 @@ function percentile(rank: SubjectRank): number {
     <Head title="Panou" />
 
     <AppLayout>
-        <div class="space-y-6">
+        <div class="space-y-8">
             <!-- Numărătoarea inversă până la examen: ea decide ce face platforma
                  cu tine. Cu 200 de zile rămase înveți; cu 10, repari găurile. -->
-            <div v-if="exam" class="card border-brand-500/30">
-                <div class="flex items-baseline justify-between">
-                    <p class="text-sm text-slate-400">{{ exam.name }}</p>
-                    <p v-if="exam.days_left !== null" class="text-2xl font-black tabular-nums">
-                        {{ exam.days_left }} <span class="text-sm font-normal text-slate-400">zile</span>
-                    </p>
-                </div>
-                <p v-if="exam.phase" class="mt-2 text-sm text-brand-400">
+            <div v-if="exam" class="text-sm">
+                <p v-if="exam.days_left !== null" class="font-semibold text-slate-200">
+                    {{ days(exam.days_left) }} până la BAC
+                </p>
+                <p v-if="exam.phase" class="mt-0.5 text-slate-400">
                     {{ phaseLabels[exam.phase] ?? exam.phase }}
                 </p>
             </div>
 
-            <div>
-                <div class="mb-3 flex items-baseline justify-between">
-                    <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        Disciplinele mele
-                    </h2>
-                    <Link :href="route('subjects.edit')" class="text-sm text-brand-400 hover:underline">
+            <!-- Ținta de azi: capul zilnic de XP (§6) ca obiectiv, nu ca limită
+                 ascunsă, plus un singur buton care pornește antrenamentul. -->
+            <section class="rounded-3xl bg-hero p-5 text-on-hero sm:p-6">
+                <div class="flex items-center justify-between gap-3 text-sm font-semibold">
+                    <h2>Ținta de azi</h2>
+                    <span v-if="game" class="inline-flex items-center gap-1.5 tabular-nums">
+                        <Icon name="flame" />
+                        {{ game.streak_days === 1 ? '1 zi la rând' : `${game.streak_days} zile la rând` }}
+                    </span>
+                </div>
+
+                <template v-if="game">
+                    <p class="mt-3 font-display text-5xl font-extrabold tracking-tight tabular-nums text-hero-accent">
+                        {{ nf.format(game.xp_today) }}<span class="text-xl font-semibold text-on-hero"> / {{ nf.format(game.daily_cap) }} XP</span>
+                    </p>
+                    <div
+                        class="mt-4 h-3.5 overflow-hidden rounded-full bg-on-hero/15"
+                        role="progressbar"
+                        :aria-valuenow="game.xp_today"
+                        aria-valuemin="0"
+                        :aria-valuemax="game.daily_cap"
+                        aria-label="XP câștigat azi"
+                    >
+                        <div class="h-full min-w-3.5 rounded-full bg-hero-accent transition-all" :style="{ width: dailyPct + '%' }" />
+                    </div>
+                </template>
+
+                <button
+                    v-if="next"
+                    type="button"
+                    class="btn-primary mt-5 w-full"
+                    :disabled="starting"
+                    @click="startPractice(next)"
+                >
+                    {{ starting ? 'Se pregătește…' : `Continuă la ${next.name.toLowerCase()}` }}
+                </button>
+            </section>
+
+            <section>
+                <div class="mb-2 flex items-baseline justify-between">
+                    <h2 class="font-display text-lg font-semibold">Disciplinele mele</h2>
+                    <Link :href="route('subjects.edit')" class="text-sm font-semibold text-brand-400 hover:underline">
                         Modifică
                     </Link>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <button
-                        v-for="subject in subjects"
-                        :key="subject.slug"
-                        type="button"
-                        class="card text-left transition"
-                        :class="subject.is_playable
-                            ? 'hover:border-white/25 active:scale-[0.99]'
-                            : 'cursor-not-allowed opacity-60'"
-                        @click="openSubject(subject.slug)"
-                    >
-                        <div class="flex items-start justify-between">
-                            <Icon :name="subject.icon ?? 'book'" class="text-2xl text-slate-300" />
+                <ul class="divide-y divide-white/10">
+                    <li v-for="subject in ordered" :key="subject.slug">
+                        <Link
+                            :href="route('subject.show', subject.slug)"
+                            class="flex min-h-16 items-center gap-4 py-3 transition hover:opacity-80"
+                            :class="subject.is_playable ? '' : 'opacity-60'"
+                        >
+                            <!-- Clasamentul pe disciplină: comparația care are sens.
+                                 Un XP global ar amesteca matematica cu engleza. -->
                             <span
-                                v-if="subject.is_primary"
-                                class="rounded-md bg-brand-500/20 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-400"
+                                class="grid size-11 shrink-0 place-items-center rounded-xl font-display text-base font-extrabold"
+                                :class="subject.rank ? 'bg-brand-500/15 text-brand-400' : 'bg-white/5 text-slate-400'"
                             >
-                                profil
+                                <template v-if="subject.rank">{{ nf.format(subject.rank.rank) }}</template>
+                                <Icon v-else :name="subject.icon ?? 'book'" />
                             </span>
-                        </div>
 
-                        <p class="mt-2 font-semibold">{{ subject.name }}</p>
-
-                        <!-- Clasamentul pe disciplină: comparația care are sens.
-                             Un XP global ar amesteca matematica cu engleza. -->
-                        <div v-if="subject.rank" class="mt-3 space-y-1">
-                            <p class="text-sm">
-                                <span class="font-black tabular-nums text-brand-400">
-                                    #{{ nf.format(subject.rank.rank) }}
+                            <span class="min-w-0 flex-1">
+                                <span class="flex flex-wrap items-center gap-x-2">
+                                    <span class="font-semibold">{{ subject.name }}</span>
+                                    <span
+                                        v-if="subject.is_primary"
+                                        class="rounded-full bg-brand-500/15 px-2 text-xs font-semibold text-brand-400"
+                                    >profil</span>
                                 </span>
-                                <span class="text-slate-400">
-                                    din {{ nf.format(subject.rank.total) }}
+                                <span class="mt-0.5 block text-sm text-slate-400">{{ caption(subject) }}</span>
+                                <span v-if="subject.open_gaps" class="mt-0.5 block text-sm text-amber-400">
+                                    <Icon name="circle-question-mark" class="mr-1" />{{ subject.open_gaps }}
+                                    {{ subject.open_gaps === 1 ? 'lucru nelămurit' : 'lucruri nelămurite' }}
                                 </span>
-                            </p>
+                            </span>
 
-                            <div class="h-1 overflow-hidden rounded-full bg-white/5">
-                                <div class="h-full rounded-full bg-brand-500 transition-all"
-                                    :style="{ width: percentile(subject.rank) + '%' }" />
-                            </div>
-
-                            <p class="text-xs text-slate-500 tabular-nums">
-                                {{ nf.format(subject.xp) }} XP
-                                <template v-if="subject.accuracy !== null">
-                                    · {{ Math.round(subject.accuracy * 100) }}% corecte
-                                </template>
-                            </p>
-                        </div>
-
-                        <p v-if="subject.open_gaps" class="mt-2 text-xs text-amber-400/80">
-                            <Icon name="circle-question-mark" class="mr-1" />{{ subject.open_gaps }}
-                            {{ subject.open_gaps === 1 ? 'lucru nelămurit' : 'lucruri nelămurite' }}
-                        </p>
-
-                        <p v-if="!subject.rank" class="mt-3 text-xs" :class="subject.is_playable ? 'text-slate-400' : 'text-amber-400/80'">
-                            {{ subject.is_playable
-                                ? 'Încă neclasat · ' + subject.items_count + ' întrebări'
-                                : 'Conținut în pregătire' }}
-                        </p>
-                    </button>
-                </div>
-            </div>
+                            <span v-if="subject.accuracy !== null" class="shrink-0 text-right">
+                                <span class="block font-bold tabular-nums">{{ Math.round(subject.accuracy * 100) }}%</span>
+                                <span class="block text-xs text-slate-400">corecte</span>
+                            </span>
+                        </Link>
+                    </li>
+                </ul>
+            </section>
 
             <p v-if="!leaderboard_opt_in" class="card text-sm text-slate-400">
                 Nu apari în clasamente.

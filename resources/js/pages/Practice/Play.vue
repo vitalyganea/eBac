@@ -200,14 +200,17 @@ function next() {
                         {{ session.progress.answered }} / {{ session.progress.total }}
                     </span>
                 </div>
-                <div class="h-2 overflow-hidden rounded-full bg-white/5">
-                    <div class="h-full rounded-full bg-brand-500 transition-all duration-500"
+                <div class="h-3 overflow-hidden rounded-full bg-white/5">
+                    <div class="h-full rounded-full bg-action transition-all duration-500"
                         :style="{ width: progressPct + '%' }" />
                 </div>
             </div>
 
-            <div class="card">
-                <p v-if="item.skill" class="mb-4 text-xs font-semibold uppercase tracking-wide text-brand-400">
+            <section>
+                <p
+                    v-if="item.skill"
+                    class="mb-4 inline-block rounded-full bg-brand-500/15 px-3 py-1 text-sm font-semibold text-brand-400"
+                >
                     {{ item.skill.name }}
                 </p>
 
@@ -221,7 +224,7 @@ function next() {
                     :disabled="isAnswered"
                     @update:model-value="answer = $event"
                 />
-            </div>
+            </section>
 
             <!-- Indicii dezvăluite, în trepte -->
             <div v-if="revealedHints.length" class="space-y-2">
@@ -230,7 +233,7 @@ function next() {
                     :key="i"
                     class="rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm"
                 >
-                    <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-400/80">
+                    <p class="mb-1 text-sm font-semibold text-amber-400">
                         Indiciu {{ i + 1 }} din {{ hints.total }}
                     </p>
                     <MathText :text="hint" />
@@ -251,16 +254,16 @@ function next() {
             <div
                 v-if="feedback"
                 class="card"
-                :class="feedback.is_correct ? 'border-emerald-500/40' : 'border-rose-500/40'"
+                :class="feedback.is_correct ? 'border-action' : 'border-rose-500/60'"
             >
                 <div class="flex items-center gap-3">
                     <Icon :name="feedback.is_correct ? 'circle-check' : 'circle-x'"
                           class="text-2xl"
-                          :class="feedback.is_correct ? 'text-emerald-400' : 'text-rose-400'"
+                          :class="feedback.is_correct ? 'text-action' : 'text-rose-400'"
                           :label="feedback.is_correct ? 'Corect' : 'Greșit'" />
                     <div class="flex-1">
-                        <p class="font-bold">
-                            {{ feedback.is_correct ? 'Corect' : 'Greșit' }}
+                        <p class="font-display text-lg font-extrabold">
+                            {{ feedback.is_correct ? 'Corect!' : 'Greșit' }}
                             <span
                                 v-if="!feedback.is_correct && feedback.score > 0"
                                 class="ml-1 text-sm font-normal text-amber-400"
@@ -323,7 +326,7 @@ function next() {
                 <button
                     v-if="canAskHint"
                     type="button"
-                    class="btn-ghost inline-flex items-center gap-1.5"
+                    class="btn-ghost min-h-14 inline-flex items-center gap-1.5"
                     :disabled="loadingHint"
                     @click="requestHint"
                 >
@@ -334,14 +337,14 @@ function next() {
                     </template>
                 </button>
 
-                <button v-if="!isAnswered" type="button" class="btn-primary flex-1" :disabled="!canSubmit" @click="submit">
+                <button v-if="!isAnswered" type="button" class="btn-primary min-h-14 flex-1" :disabled="!canSubmit" @click="submit">
                     <template v-if="submitting">Se trimite…</template>
                     <!-- În simulare nu există feedback pe parcurs: răspunsul se
                          înregistrează, iar corectarea apare la final. -->
                     <template v-else>{{ isMock ? 'Răspunde' : 'Verifică' }}</template>
                 </button>
 
-                <button v-else type="button" class="btn-primary flex-1" @click="next">
+                <button v-else type="button" class="btn-primary min-h-14 flex-1" @click="next">
                     {{ has_next ? 'Continuă' : 'Vezi rezultatul' }}
                 </button>
             </div>

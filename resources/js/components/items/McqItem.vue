@@ -32,9 +32,36 @@ function classFor(key: string): string {
         return chosen.value === key ? 'choice-selected' : '';
     }
     if (correctKeys.value.includes(key)) return 'choice-correct';
-    if (chosen.value === key) return 'choice-wrong';
+    if (chosen.value === key) return 'choice-wrong line-through decoration-rose-400';
     return 'opacity-50';
 }
+
+/** Pătrățelul cu litera urmează starea variantei, ca să se vadă și fără culoarea chenarului. */
+function tileFor(key: string): string {
+    if (!props.feedback) {
+        return chosen.value === key ? 'bg-brand-400 text-on-action' : 'bg-white/10 text-brand-400';
+    }
+    if (correctKeys.value.includes(key)) return 'bg-on-action text-action';
+    if (chosen.value === key) return 'bg-rose-500 text-on-accent';
+    return 'bg-white/10 text-slate-400';
+}
+
+/**
+ * Patru variante scurte („șirul este constant", „√2") încap în grilă 2×2:
+ * ținte mari pentru deget, totul vizibil fără derulare. Variantele lungi, cele
+ * de lângă un text-suport sau un program rămân una sub alta — în două coloane
+ * pe un telefon de 360px s-ar rupe pe cinci rânduri.
+ */
+const grid = computed(() => {
+    const choices = props.item.payload.choices ?? [];
+    return (
+        choices.length === 4 &&
+        !props.item.payload.passage &&
+        !props.item.payload.code &&
+        !props.item.payload.code_variants &&
+        choices.every((c) => (c.text ?? '').length <= 32)
+    );
+});
 </script>
 
 <template>
@@ -53,7 +80,7 @@ function classFor(key: string): string {
             <p class="whitespace-pre-line">{{ item.payload.passage }}</p>
         </div>
 
-        <p class="text-lg leading-relaxed">
+        <p class="text-xl font-medium leading-relaxed">
             <MathText :text="item.payload.stem" />
         </p>
 
@@ -80,22 +107,23 @@ function classFor(key: string): string {
             class="mx-auto max-h-64 rounded-xl"
         />
 
-        <div class="space-y-3">
+        <div :class="grid ? 'grid grid-cols-2 gap-3' : 'space-y-3'">
             <button
                 v-for="(choice, i) in item.payload.choices ?? []"
                 :key="choice.key"
                 type="button"
                 class="choice"
-                :class="classFor(choice.key)"
+                :class="[classFor(choice.key), grid ? 'min-h-28 flex-col items-start justify-between gap-3' : '']"
                 :disabled="disabled"
                 @click="select(choice.key)"
             >
                 <span
-                    class="grid size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-sm font-bold"
+                    class="grid size-8 shrink-0 place-items-center rounded-lg font-display text-sm font-extrabold transition"
+                    :class="tileFor(choice.key)"
                 >
                     {{ 'ABCD'[i] ?? i + 1 }}
                 </span>
-                <MathText :text="choice.text" :latex="choice.latex" class="flex-1" />
+                <MathText :text="choice.text" :latex="choice.latex" :class="grid ? '' : 'flex-1'" />
             </button>
         </div>
     </div>

@@ -72,7 +72,7 @@ function syncThemeColor(): void {
 
     document
         .querySelector('meta[name="theme-color"]')
-        ?.setAttribute('content', light ? '#f8fafc' : '#0f172a');
+        ?.setAttribute('content', light ? '#ffffff' : '#0a1636');
 }
 
 export function setTheme(value: Theme): void {

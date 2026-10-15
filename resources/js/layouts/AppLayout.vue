@@ -92,9 +92,9 @@ function logout() {
                 <component
                     :is="user ? Link : 'a'"
                     :href="user ? route('dashboard') : route('public.home')"
-                    class="font-black tracking-tight"
+                    class="font-display text-lg font-extrabold tracking-tight text-action"
                 >
-                    e<span class="text-brand-400">Bac</span>
+                    eBac
                 </component>
 
 <!-- XP-ul și nivelul sunt PE DISCIPLINĂ, deci nu au ce căuta aici:
@@ -106,7 +106,7 @@ function logout() {
                         <Icon name="flame" class="text-amber-400" />{{ game.streak_days }}
                     </span>
                     <span class="flex items-center gap-1 tabular-nums text-slate-400" title="XP câștigat azi">
-                        <Icon name="star" class="text-brand-400" />{{ game.xp_today }}<span class="text-slate-600">/{{ game.daily_cap }}</span>
+                        <Icon name="star" class="text-action" />{{ game.xp_today }}<span class="text-slate-600">/{{ game.daily_cap }}</span>
                     </span>
                 </div>
 
@@ -153,7 +153,7 @@ function logout() {
 
             <!-- Bară de progres spre capul zilnic -->
             <div v-if="game" class="h-0.5 bg-white/5">
-                <div class="h-full bg-brand-500 transition-all" :style="{ width: dailyPct + '%' }" />
+                <div class="h-full bg-action transition-all" :style="{ width: dailyPct + '%' }" />
             </div>
         </header>
 

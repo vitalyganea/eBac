@@ -57,7 +57,7 @@ it('aplică tema și mărimea și în aplicație', function () {
 
     expect($html)->toContain('data-theme="light"')
         ->and($html)->toContain('data-font="lg"')
-        ->and($html)->toContain('content="#f8fafc"');
+        ->and($html)->toContain('content="#ffffff"');
 });
 
 it('rămâne pe tema întunecată fără cookie', function () {

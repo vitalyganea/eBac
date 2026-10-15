@@ -440,6 +440,25 @@ faptul că emoji-urile nu se strecoară înapoi. **Avatarurile sunt exceptate
 deliberat** — lista fixă de 12 emoji rămâne opțiunea implicită pentru că nu
 ocupă spațiu, nu cere moderare și e instant (§10f, §10g).
 
+## 10j. Identitatea vizuală: albastru și galben, zi și noapte
+
+Culorile steagului. Tema întunecată (implicită) stă pe bleumarin `#0a1636`, nu
+pe negru; cea luminoasă pe alb, cu cerneală bleumarin. Tokenurile din
+`resources/css/app.css` își schimbă VALOAREA cu tema, nu rolul:
+
+- `action` / `on-action` — acțiunea principală (`btn-primary`, bara de progres,
+  răspunsul corect): galbenă pe întunecat, albastră pe luminos. Galbenul pe alb
+  n-ar avea contrast, de aceea nu e o singură culoare.
+- `hero` / `on-hero` / `hero-accent` — blocul „Ținta de azi" de pe panou.
+- `slate-*`, `white`, `brand-*` — rampa existentă, redefinită (§ „Tema
+  luminoasă" din app.css). Componentele nu se rescriu la o schimbare de paletă.
+
+Fonturile — Onest pentru text, Unbounded doar pentru siglă, cifre mari și câteva
+titluri — stau în `resources/fonts`, generate cu `bin/fonts.sh`. NU de pe Google
+Fonts: utilizatorii sunt minori (§9). Fiecare font e tăiat în latin, literele
+românești (~3 KB) și chirilic, cu `unicode-range`; fișierul „latin-ext" întreg
+(până la 118 KB) s-ar fi descărcat la primul „ș". Nu-l adăuga înapoi.
+
 ## 11. Conținutul se validează automat, nu prin recitire
 
 `ContentIntegrityTest` verifică structural tot conținutul publicat: cheia de
